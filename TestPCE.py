@@ -165,6 +165,10 @@ def runSimulated():
     pce.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
     pce.setClusterWaitFunc(waitCluster)
     
+    """
+    Format: {"Image Name in the dataset table":{"name":Real image name,"file":Image file name with full path}}
+        Image file name =Images["Image Name in the dataset table"]["file"]
+    """
     fixedImages=Images.getFixedImages()
     movingImages=Images.getMovingImages()
     

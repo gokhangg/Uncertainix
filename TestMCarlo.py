@@ -18,8 +18,11 @@
 # *  the License.
 # *=========================================================================
 
-import SimpleITK as sitk
+
 import sys,time,os
+import lib.Param as PR
+import lib.MonteCarlo as MC
+import TestImages as Images
 
 if sys.version_info[0]==3:
     import subprocess
@@ -28,15 +31,18 @@ else:
     import commands
     exeGetOutput=commands.getoutput
 
-def load_itk(filename):
-    # Reads the image using SimpleITK
-    return sitk.ReadImage(filename)
-    
 SelfPath=os.path.dirname(os.path.realpath(__file__))
 
 sys.path.insert(0,"./lib")
 sys.path.insert(0,"../lib")
 
+"""
+@brief: It just waits till end of all 
+        jobs of the user.
+@Note:  Experiments were executed on the BIGR cluster facility and this 
+        method is wait function for this cluster. Therefore, for a different
+        cluster this method should be revisiteda dn modified.
+"""
 def waitCluster():
     Qstat=exeGetOutput("qstat ")
     cnt=0
@@ -45,10 +51,8 @@ def waitCluster():
         if not cnt==Qstat.count("\n"):
             cnt=Qstat.count("\n")
             print("Remaining Task ",cnt-1)
-        time.sleep(2) 
+        time.sleep(2)  
 
-import lib.MonteCarlo as MC
-import lib.Param as PR
 
 def setupEnvSimulatedData(el):
      #Root Dir where the results to be saved
@@ -84,13 +88,8 @@ def setupEnvSimulatedData(el):
     el["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
     el["Pce_WeightFile"]=el["registRootDir"]+"/PceWeights.txt"
     
-    el["fixedIm"]=el["fixedDatasetPath"]+"/ImFlatN.mhd"
+    
  
-    
-    
-    
-  
-    
     
 images=range(0,1)
 def run():
@@ -104,20 +103,11 @@ def run():
     """"[ParamName,ParamDist,Param,ParamMean,ParamStd]"""
     """For uniform distribution ParamMean is the lower, ParamStd is the higher dist. boundary"""
     
-    """Real Dataset"""
-    #par1=PR.Param("Metric1Weight","gauss",3.3,2.8)
     """Simulated Dataset"""
     par1=PR("Metric1Weight","gauss",4.12,2.65)
     
-    """Real Dataset"""
-    #par2=PR.Param("Metric2Weight","gauss",-8.0,1.2)
-    #par2["registrationParams"]={"-dt":mc["movingSegmentationDT"],"-fp":"/scratch/ggunay/TrialReal/PointSets_Mask/Patient2Intra01.txt"}
     """Simulated Dataset"""
-    par2=PR("FinalGridSpacingInPhysicalUnits","gauss",4.37,0.55)
-    
-    """Real Dataset"""
-    #par3=PR.Param("FinalGridSpacingInPhysicalUnits","gauss",6.0,0.5)
-    
+    par2=PR("FinalGridSpacingInPhysicalUnits","gauss",4.37,0.55)    
 
     par1.setValMapFunct(lambda a:pow(2,a)) 
     mc.addParam(par1)
@@ -125,15 +115,18 @@ def run():
     par2.setValMapFunct(lambda a:pow(2,a))
     mc.addParam(par2)
     
-    #par3.setValMapFunct(lambda a:pow(2,a))
-    #mc.addParam(par3)
+    """
+    Format: {"Image Name in the dataset table":{"name":Real image name,"file":Image file name with full path}}
+        Image file name =Images["Image Name in the dataset table"]["file"]
+    """
+    fixedImages=Images.getFixedImages()
+    movingImages=Images.getMovingImages()
     
     mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.setWaitClusterFunc(waitCluster)
-    for it in images:
-        #mc["movingIm"]=mc["movingDatasetPath"]+"/Pre.mhd"#"/Im"+str(it)+"N.mhd"
-        mc["movingIm"]=mc["movingDatasetPath"]+"/Im"+str(it)+"N.mhd"
-        mc.run(mc,W,50,False,True,False)
-
+    for ind in movingImages:
+        mc["fixedIm"]=fixedImages["Image0"]["file"]
+        mc["movingIm"]=movingImages[ind]["file"]
+        mc.run(W,50,False,True,False)
 run()
