@@ -1,0 +1,14 @@
+ObjectType = Image
+NDims = 2
+BinaryData = True
+BinaryDataByteOrderMSB = False
+CompressedData = True
+CompressedDataSize = 11751
+TransformMatrix = 1 0 0 1
+Offset = 50 60
+CenterOfRotation = 0 0
+ElementSpacing = 1 1
+DimSize = 512 512
+AnatomicalOrientation = ??
+ElementType = MET_DOUBLE
+ElementDataFile = ImGrid.zraw

@@ -1,0 +1,18 @@
+{
+    "pol_order" : "4",
+    "grid_level" : "3",
+    "quadrature_type" : ["gauss-hermite","gauss-hermite"],
+    "pol_type" : ["hermite","hermite"],    
+    "grid_type" : "sparse",
+    "trim" : "1",
+    "remove_small_elements" : "1",
+    "small_element_threshold" : "1e-13",
+    
+    "blackbox_function" : "example_problem",
+    "std_devs" : [".5","1.5"],
+    
+    "optional_arguments" : {
+        "problem_number" : "1"
+    }
+
+}
