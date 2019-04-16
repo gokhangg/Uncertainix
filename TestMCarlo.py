@@ -88,10 +88,6 @@ def setupEnvSimulatedData(el):
     el["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
     el["Pce_WeightFile"]=el["registRootDir"]+"/PceWeights.txt"
     
-    
- 
-    
-images=range(0,1)
 def run():
     mc=MC()
     setupEnvSimulatedData(mc)
