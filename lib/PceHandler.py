@@ -54,15 +54,15 @@ class PceHandler(Elastix):
     def run(self,rigOnCluster=False,nonRigOnCluster=False):
         self.elastixOnCluster(rigOnCluster)
         self.runRig()
-        #self.generatePceParamFile()
-        #self.generateWeightFile()
-        #self.loadWeightFromFile()
+        self.generatePceParamFile()
+        self.generateWeightFile()
+        self.loadWeightFromFile()
         self.__clusterWaitFunc()
         self.elastixOnCluster(nonRigOnCluster)
-        #for cnt in range(0,self.__sampleNum):
-            #self.runNonRigSingle(cnt)
+        for cnt in range(0,self.__sampleNum):
+            self.runNonRigSingle(cnt)
         self.clusterWait()
-        #self.getStd()
+        self.getStd()
     
     """
     @brief: Generates standard image after all parameters are settled.
