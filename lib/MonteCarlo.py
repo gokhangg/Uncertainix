@@ -59,11 +59,11 @@ class MonteCarlo(Elastix):
         self.generateParamVals()
         self.saveParams()
         self.elastixOnCluster(rigOnCluster)
-        mc.runRig()
+        self.runRig()
         self.waitCluster()
         self.elastixOnCluster(nonRigOnCluster)
         for cnt in range(0,sampleNum):
-                mc.runNonRigSingle(cnt)
+                self.runNonRigSingle(cnt)
         self.waitCluster()
         self.transformixOnCluster(transformixOnCluster)
         self.setClusterBatchLim(clusterBatchLim)
