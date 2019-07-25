@@ -77,6 +77,12 @@ function out = commandlineParser(input)
             out.requestedUncertGroupList = cmdLineUncertParser(input(ind+1));
         end
 
+        if strcmp(input(ind),'-Evaluate')
+            out.evaluate = true;
+            out.evaluationFile = char(input(ind+1));
+            display(out.evaluationFile);
+        end
+        
         if strcmp(input(ind),'-verbose')
             out.verbose = true;
         end

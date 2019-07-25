@@ -11,12 +11,7 @@ function multi_index = create_sparse_multi_index(max_value, N_dimensions)
 %
 %   OUTPUT: 
 %           multi_index: The constructed multi-index [NxM matrix where N =
-%           number of combinations and M = N_dimensions 
-%
-%
-%   This software is released under the <a href="matlab: 
-%   web('https://www.gnu.org/licenses/gpl-3.0.en.html')">GPLv3 license</a>.
-%   Copyright (C) 2016  Sebastian van der Voort
+%           number of combinations and M = N_dimensions] 
 
     % Initialize cell for construction of basis, this is done progressively
     temp_multi_index = cell(max_value + 1, N_dimensions);
@@ -32,11 +27,10 @@ function multi_index = create_sparse_multi_index(max_value, N_dimensions)
                 temp_result(:, end + 1) = i_intermediate_value; %#ok add the current value
                 % Update the  matrix with new values
                 temp_multi_index{i_value + 1, i_dim} = [temp_multi_index{i_value + 1, i_dim}; temp_result]; 
-                display(temp_result)
             end        
         end
     end
 
     % Need the final result as a matrix
-    multi_index2 = cell2mat(temp_multi_index(:, N_dimensions));
+    multi_index = cell2mat(temp_multi_index(:, N_dimensions));
 end

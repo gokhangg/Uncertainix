@@ -19,7 +19,8 @@
 % # *=========================================================================
 
 function pceExe(varargin)
-    
+    %addpath(genpath(pwd));
+
     %input argument parsing
     pars = commandlineParser(varargin);
     %read settings file and init PCE
@@ -90,6 +91,26 @@ function pceExe(varargin)
                 end
             if (pars.verbose)
                 display('Uncertainty written') 
+            end
+        end
+        if (pars.evaluate)
+                %calculate uncertainties as per the list provided in
+                %pars.requestedUncertGroupList
+                scenarios=handleEvaluationFile(pars.evaluationFile);
+                sz_scenarios=size(scenarios);
+                for ind = 1:sz_scenarios(1)
+                    %get uncertainty image for combination in list "pars.requestedUncertGroupList".
+                    evaluationImageData = evaluate_PCE(PCE,scenarios(ind,:));
+
+                    %write estimated evaluation image.
+                    fileName=char(strcat('Gl',num2str(SettingsPCE.grid_level),'Po',num2str(SettingsPCE.pol_order),'Scen',num2str(ind)));
+                    fullFileName = char(strcat(pars.outDir,'/',fileName));
+                    mhdTextOut = strcat(MhdText(1:strfind(MhdText,'ElementDataFile')),'lementDataFile = ',fileName,'.raw');
+                    writeUncertaintyImage(fullFileName,evaluationImageData,mhdTextOut);
+
+                end
+            if (pars.verbose)
+                display('Evaluation images written')
             end
         end
     end
