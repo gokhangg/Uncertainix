@@ -53,7 +53,6 @@ function pceExe(varargin)
         %from output of the model analyzed.
         sampleSize = size(cubature.scenarios_scaled);
         dataLoaded = loadDataFromDir(pars.rootDirInput,sampleSize);
-        display(dataLoaded.data);
         MhdText=dataLoaded.mhdText;
         ParamAll = dataLoaded.data;
         if (pars.verbose)
@@ -98,7 +97,6 @@ function pceExe(varargin)
                 %calculate uncertainties as per the list provided in
                 %pars.requestedUncertGroupList
                 scenarios=handleEvaluationFile(pars.evaluationFile);
-                display(scenarios(1,:))
                 sz_scenarios=size(scenarios);
                 for ind = 1:sz_scenarios(1)
                     %get uncertainty image for combination in list "pars.requestedUncertGroupList".
