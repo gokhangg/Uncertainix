@@ -19,7 +19,7 @@
 % # *=========================================================================
 
 function pceExe(varargin)
-    %addpath(genpath(pwd));
+    addpath(strcat(pwd,'/MatlabScripts/EPICPY'));
 
     %input argument parsing
     pars = commandlineParser(varargin);
@@ -31,10 +31,10 @@ function pceExe(varargin)
     PCE = struct();
     PCE.std_devs = SettingsPCE.std_devs;
     PCE.pol_type = SettingsPCE.pol_type;
-	PCE.quadrature_type = SettingsPCE.quadrature_type; 
+    PCE.quadrature_type = SettingsPCE.quadrature_type; 
     
-	% First add the basis to the structure
-	[PCE.basis, PCE.norm] = create_basis_PC(PCE, SettingsPCE);            
+    % First add the basis to the structure
+    [PCE.basis, PCE.norm] = create_basis_PC(PCE, SettingsPCE);            
     % First get all the information about the cubature
     cubature = get_error_scenarios(SettingsPCE);
     
@@ -53,6 +53,7 @@ function pceExe(varargin)
         %from output of the model analyzed.
         sampleSize = size(cubature.scenarios_scaled);
         dataLoaded = loadDataFromDir(pars.rootDirInput,sampleSize);
+        display(dataLoaded.data);
         MhdText=dataLoaded.mhdText;
         ParamAll = dataLoaded.data;
         if (pars.verbose)
@@ -97,6 +98,7 @@ function pceExe(varargin)
                 %calculate uncertainties as per the list provided in
                 %pars.requestedUncertGroupList
                 scenarios=handleEvaluationFile(pars.evaluationFile);
+                display(scenarios(1,:))
                 sz_scenarios=size(scenarios);
                 for ind = 1:sz_scenarios(1)
                     %get uncertainty image for combination in list "pars.requestedUncertGroupList".
