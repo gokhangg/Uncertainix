@@ -1,0 +1,7 @@
+# ignore all cluster error and output files
+
+*.e
+*.o
+ExpResults/
+.idea/
+venv/

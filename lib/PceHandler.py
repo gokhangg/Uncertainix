@@ -59,8 +59,7 @@ class PceHandler(Elastix):
         self.loadWeightFromFile()
         self.__clusterWaitFunc()
         self.elastixOnCluster(nonRigOnCluster)
-        for cnt in range(0,self.__sampleNum):
-            self.runNonRigSingle(cnt)
+        self.runAllNonRigidReg()
         self.clusterWait()
         self.getStd()
     
@@ -81,7 +80,15 @@ class PceHandler(Elastix):
         for cnt in range(0,self.__sampleNum):
             self["defFieldDir"]=self["RegMainDir"]+"/NonRigid/Transformix"+str(cnt)
             shutil.rmtree(self["defFieldDir"])
-    
+
+    """
+        @brief: Implements all non rigid registrations.
+        @return: NA.
+    """
+    def runAllNonRigidReg(self):
+        for cnt in range(0, self.__sampleNum):
+            self.runNonRigSingle(cnt)
+
     """
     @brief: Loads parameters to be analyzed.
     @param: file File name to load.
@@ -256,7 +263,7 @@ class PceHandler(Elastix):
         fl=open(self["Pce_WeightFile"],"r")
         ln=fl.readlines()
         fl.close()
-        self.__sampleNum=int(ln[0])
+        self.setSampleNumber(int(ln[0]))
         weights=[]
         for ind in range(0,self.__sampleNum):
             weights+=[ln[ind+1].split(",")]
@@ -449,6 +456,21 @@ class PceHandler(Elastix):
     """   
     def setClusterWaitFunc(self,waitFunc):
         self.__clusterWaitFunc=waitFunc
+
+    """
+        @brief: Sets sample number.
+        @param: sample number.
+        @return: NA.
+    """
+    def setSampleNumber(self, num):
+        self.__sampleNum = num
+
+    """
+        @brief: Gets sample number.
+        @return: sample number.
+    """
+    def getSampleNumber(self):
+        return self.__sampleNum
         
     """
     @brief: Waits cluster till finishing its job. This function is instantiated 
