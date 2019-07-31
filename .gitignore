@@ -1,0 +1,6 @@
+*.pyc
+MatlabScripts/mccExcludedFiles.log
+MatlabScripts/pceExe
+MatlabScripts/requiredMCRProducts.txt
+MatlabScripts/run_pceExe.sh
+
