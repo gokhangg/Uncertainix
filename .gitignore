@@ -1,4 +1,6 @@
 *.pyc
+.idea/
+venv/
 MatlabScripts/mccExcludedFiles.log
 MatlabScripts/pceExe
 MatlabScripts/requiredMCRProducts.txt
