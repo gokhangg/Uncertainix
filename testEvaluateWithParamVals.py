@@ -107,7 +107,7 @@ def setupEnvSimulatedDataPCE(el):
     el["transformixExe"] = "/scratch/ggunay/Tools/elastix/src/bin/transformix"
     el["Pce_WeightFile"] = el["registRootDir"] + "/PceWeights.txt"
 
-def runExperiment(pixelLoc):
+def runExperiment():
     mc = lib.MonteCarlo()
     setupEnvSimulatedData(mc)
     mc["RegMainDir"] = mc["registRootDir"]
@@ -155,6 +155,7 @@ def runExperiment(pixelLoc):
     for cnt in range(0, mc.getSampleNum()):
         mc.runNonRigSingle(cnt)
     mc.waitCluster()
+    
 
     mc.transformixOnCluster(True)
     for index in range(0, mc.getSampleNum()):
@@ -162,17 +163,9 @@ def runExperiment(pixelLoc):
         mc["nonRigRegDir"] = mc["RegMainDir"] + "/NonRigid/Elas" + str(index)
         mc.getDeformationField()
     mc.waitCluster()
+    return sampleMesh, mc
 
-    fl = open(mc["RootDir"]+"/ExpResults/valueListMC.txt","w")
-    for ind in range(0,len(sampleMesh[0])):
-        file = mc["RegMainDir"] + "/NonRigid/Trans" + str(ind)+"/deformationField.mhd"
-        val = loadItkImage(file)[0][pixelLoc[0], pixelLoc[1]]
-        fl.write(str(sampleMesh[0][ind])+" "+str(sampleMesh[1][ind])+" "+str(val)+"\n")
-    fl.close()
-    
-
-
-def runExperimentPCE(pixelLoc):
+def runExperimentPCE():
     compiler = lib.MatlabExeCompiler()
     compiler["preCommands"]="module load matlab & module load mcr &"
     compiler["postCommands"]=""
@@ -255,12 +248,35 @@ def runExperimentPCE(pixelLoc):
     cmd += pce["postPceCommands"]
     os.system(cmd)
 
+    return sampleMesh, pce
+
+pixelLoc = [243, 233]
+sampleMesh, mc =runExperiment()
+_, pce = runExperimentPCE()
+
+if 1:
+    fl = open(pce["RootDir"]+"/ExpResults/diff.txt","w")
     for ind in range(1, len(sampleMesh[0])+1):
-        file = pce["RegMainDir"]+"/Gl"+str(gridLevel)+"Po"+str(polOrder)+"Scen"+str(ind)+".mhd"
-        val = loadItkImage(file)[0][pixelLoc[0], pixelLoc[1]]
-        fl.write(str(sampleMesh[0][ind-1])+" "+str(sampleMesh[1][ind-1])+" "+str(val)+"\n")
+        file = pce["RegMainDir"]+"/Gl"+str(pce.getGridLevel())+"Po"+str(pce.getPolOrder())+"Scen"+str(ind)+".mhd"
+        valPce = loadItkImage(file)[0].reshape(-1)
+        file = mc["RegMainDir"] + "/NonRigid/Trans" + str(ind-1)+"/deformationField.mhd"
+        valMc = loadItkImage(file)[0].reshape(-1)
+        amp = np.abs(valMc).mean()
+        meanDiff = np.abs(valMc-valPce).mean()
+        fl.write(str(sampleMesh[0][ind-1])+" "+str(sampleMesh[1][ind-1])+" "+str(amp)+" "+str(meanDiff)+"\n")
     fl.close()
-
-
-runExperiment([243, 233])
-runExperimentPCE([243, 233])
+    for ind0 in range(0,16):
+        for ind1 in range(0,16):
+            fl = open(mc["RootDir"]+"/ExpResults/valueListMC"+str(32*ind0)+"_"+str(32*ind1)+".txt","w")
+            for ind in range(0,len(sampleMesh[0])):
+                file = mc["RegMainDir"] + "/NonRigid/Trans" + str(ind)+"/deformationField.mhd"
+                val = loadItkImage(file)[0][32*ind0, 32*ind1]
+                fl.write(str(sampleMesh[0][ind])+" "+str(sampleMesh[1][ind])+" "+str(val)+"\n")
+            fl.close()
+            
+            fl = open(pce["RootDir"]+"/ExpResults/valueListPCE"+str(32*ind0)+"_"+str(32*ind1)+".txt","w")
+            for ind in range(1, len(sampleMesh[0])+1):
+                file = pce["RegMainDir"]+"/Gl"+str(pce.getGridLevel())+"Po"+str(pce.getPolOrder())+"Scen"+str(ind)+".mhd"
+                val = loadItkImage(file)[0][32*ind0, 32*ind1]
+                fl.write(str(sampleMesh[0][ind-1])+" "+str(sampleMesh[1][ind-1])+" "+str(val)+"\n")
+            fl.close()
