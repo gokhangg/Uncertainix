@@ -22,7 +22,7 @@
 import sys,time,os
 import lib.Param as PR
 import lib.MonteCarlo as MC
-import TestImages as Images
+import DatasetsAndParameters.Dataset as Dataset
 
 if sys.version_info[0]==3:
     import subprocess
@@ -98,33 +98,17 @@ def runSimulated():
     
     """"[ParamName,ParamDist,Param,ParamMean,ParamStd]"""
     """For uniform distribution ParamMean is the lower, ParamStd is the higher dist. boundary"""
-    
-    """Simulated Dataset"""
-    par1=PR("Metric1Weight","gauss",4.12,2.65)
-    
-    """Simulated Dataset"""
-    par2=PR("FinalGridSpacingInPhysicalUnits","gauss",4.37,0.55)    
 
-    par1.setValMapFunct(lambda a:pow(2,a)) 
-    mc.addParam(par1)
-    
-    par2.setValMapFunct(lambda a:pow(2,a))
-    mc.addParam(par2)
-    
-    """
-    Format: {"Image Name in the dataset table":{"name":Real image name,"file":Image file name with full path}}
-        Image file name =Images["Image Name in the dataset table"]["file"]
-    """
-    fixedImages=Images.getFixedImages()
-    movingImages=Images.getMovingImages()
+    Data = Dataset()
     
     clusterProcessNumberUppperLimit=50
     
     mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.setWaitClusterFunc(waitCluster)
-    for ind in movingImages:
-        mc["fixedIm"]=fixedImages["Image0"]["file"]
-        mc["movingIm"]=movingImages[ind]["file"]
-        mc.run(W,clusterProcessNumberUppperLimit,False,True,False)
+    for it in Data:
+        mc["fixedIm"] = it["fixedIm"]
+        mc["movingIm"] = it["movingIm"]
+        mc.setParams(it["parameters"])
+        mc.run(W, clusterProcessNumberUppperLimit,False,True,False)
 runSimulated()

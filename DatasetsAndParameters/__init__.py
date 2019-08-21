@@ -70,7 +70,7 @@ def getMovingImageSegmentations():
 
 
 
-class DataSet(object):
+class Dataset(object):
     def __init__(self):
         self.__parameters = getParameters()
         self.__fixedImages = getFixedImages()
@@ -78,12 +78,23 @@ class DataSet(object):
         self.__fixedImageSegmentations = getFixedImageSegmentations()
         self.__movingImageSegmentations = getMovingImageSegmentations()
         self.__dictionary = {}
+        self.__iterationCount = 0
         if not len(self.__fixedImages) == len(self.__movingImages) == len(self.__fixedImageSegmentations) == len(self.__movingImageSegmentations):
             message = "Numbers of fixed, moving and their segmentations are not compatible."
             print(message)
             return message
 
         self.bindDataSetsToParams()
+
+
+    def getDatasetNumber(self):
+        return len(self.__fixedImages)
+
+    def getDatasetWithIndex(self, ind):
+        return self["DataSet"+str(ind)]
+
+    def resetIterator(self):
+        self.__iterationCount = 0
 
     def __getitem__(self, key):
         try:
@@ -94,6 +105,17 @@ class DataSet(object):
     def __setitem__(self, key, value):
         return self.__dictionary.update({key: value})
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.__iterationCount == len(self.__dictionary):
+            return StopIteration
+        else:
+            self.__iterationCount += 1
+            return self["DataSet"+str(self.__iterationCount-1)]
+
+
     """
     @brief:  Some parameters to be analyze require extra information for the registration process.
             Such as "point to surface penalty" requries moving image distance transform or segmentation and fixed image point
@@ -102,8 +124,6 @@ class DataSet(object):
     """
     def bindDataSetsToParams(self):
         for ind, [fixIm, movIm, fixSeg, movSeg] in enumerate(zip(self.__fixedImages, self.__movingImages, self.__fixedImageSegmentations, self.__movingImageSegmentations)):
-            self["ImagePair"+str(ind)] = [fixIm, movIm, fixSeg, movSeg, self.__parameters]
+            self["DataSet"+str(ind)] = {"fixedIm": fixIm, "movingIm": movIm, "fixedSeg": fixSeg, "movingSeg": movSeg, "parameters": self.__parameters}
 
-    def getDataSetsWithBoundParameters(self):
-        return self.__boundDataset
 
