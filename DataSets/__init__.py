@@ -101,10 +101,8 @@ class DataSet(object):
     @return:  NA.
     """
     def bindDataSetsToParams(self):
-        self.__boundDataset = []
-        for fixIm, movIm, fixSeg, movSeg in zip(self.__fixedImages, self.__movingImages, self.__fixedImageSegmentations, self.__movingImageSegmentations):
-            params = self.__parameters.copy()
-            self.__boundDataset += [fixIm, movIm, fixSeg, movSeg, params]
+        for ind, fixIm, movIm, fixSeg, movSeg in enumerate(zip(self.__fixedImages, self.__movingImages, self.__fixedImageSegmentations, self.__movingImageSegmentations)):
+            self["ImagePair"+str(ind)] += [fixIm, movIm, fixSeg, movSeg, self.__parameters]
 
     def getDataSetsWithBoundParameters(self):
         return self.__boundDataset
