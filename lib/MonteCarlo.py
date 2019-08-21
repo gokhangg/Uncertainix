@@ -323,6 +323,14 @@ class MonteCarlo(Elastix):
         return self.__paramsToAnalyze
 
     """
+        @brief: Sets all parameters in the analysis.
+        @param: params Parameters to be set.
+        @return: All parameters.
+    """
+    def setParams(self, params):
+        self.__paramsToAnalyze = params
+
+    """
     @brief: Returns number of parameters in the analysis.
     @return: Number of parameters.
     """
@@ -338,4 +346,3 @@ class MonteCarlo(Elastix):
 
     def setClusterBatchLim(self, lim=100):
         self.__clusterBatchLim = lim
-
