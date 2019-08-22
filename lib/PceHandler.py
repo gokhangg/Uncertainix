@@ -74,7 +74,7 @@ class PceHandler(Elastix):
             self["nonRigRegDir"]=self["RegMainDir"]+"/NonRigid/Elastix"+str(cnt)
             self.getDeformationField()
         cmd=self["prePceCommands"]
-        cmd+=self["PCE_Exe"]+" -rootDir "+self["RegMainDir"]+" -verbose -uncertainty 1_2-1-2-all"+" -sobol "+"-polOrderFile "+" -outDir "+self["RegMainDir"]+" -settingsFile "+self["PCE_ModelSetRunFile"]+" -runPCE "
+        cmd+=self["PCE_Exe"]+" -rootDir "+self["RegMainDir"]+" -verbose -uncertainty "+self["uncertaintyGroup"]+" -sobol "+"-polOrderFile "+" -outDir "+self["RegMainDir"]+" -settingsFile "+self["PCE_ModelSetRunFile"]+" -runPCE "
         cmd+=self["postPceCommands"]
         os.system(cmd)
         for cnt in range(0,self.__sampleNum):

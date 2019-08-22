@@ -111,5 +111,6 @@ def runSimulated():
         mc["fixedIm"] = it["fixedIm"]
         mc["movingIm"] = it["movingIm"]
         mc.setParams(it["parameters"])
-        mc.run(W, clusterProcessNumberUppperLimit,False,True,False)
+        mc["RegMainDir"] = mc["registRootDir"] + "/Dataset" + str(ind)
+        mc.run(W, clusterProcessNumberUppperLimit, False, True, False)
 runSimulated()

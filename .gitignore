@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 # ignore all cluster error and output files
-
+*.rar
 *.e
 *.o
 ExpResults/
-.idea/
-venv/
-=======
+
 *.pyc
 .idea/
 venv/
@@ -14,5 +11,3 @@ MatlabScripts/mccExcludedFiles.log
 MatlabScripts/pceExe
 MatlabScripts/requiredMCRProducts.txt
 MatlabScripts/run_pceExe.sh
-
->>>>>>> 29945b7c58d40b3585fcccd2c50f44ce613047f5

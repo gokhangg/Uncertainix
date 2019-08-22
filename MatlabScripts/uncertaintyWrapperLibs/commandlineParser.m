@@ -34,6 +34,7 @@ function out = commandlineParser(input)
     out.vectorLngth = 0;
     out.polOrder = 1;
     out.outDir = '';
+    out.evaluate = false
     
     for ind = 1:out.sizeInput(2)
         if strcmp(input(ind),'-rootDir')

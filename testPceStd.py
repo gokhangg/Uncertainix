@@ -20,9 +20,8 @@
 
 import sys,time,os
 import lib.PceHandler as PCE
-import lib.Param as PR
 import lib.MatlabExeCompiler as MatlabCompiler
-import TestImages as Images
+from DatasetsAndParameters import Dataset
 
 if sys.version_info[0]==3:
     import subprocess
@@ -55,7 +54,7 @@ def waitCluster():
 @brief: This method is a template to show which and how settings dictionaries
         should be assigned.
 """
-def setupEnvSimulatedData(inputDict):
+def setupEnvSimulatedDataOld(inputDict):
      #Root Dir where the results to be saved
     inputDict["RootDir"]="/scratch/ggunay/TrialReal/SimulationDataTest"
     inputDict["resultsRootDir"]=inputDict["RootDir"]+"/ExpResults/PCE"
@@ -89,7 +88,7 @@ def setupEnvSimulatedData(inputDict):
     inputDict["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
     inputDict["Pce_WeightFile"]=inputDict["registRootDir"]+"/PceWeights.txt"
 
-def setupEnvRealData(el):
+def setupEnvRealDataOld(el):
      #Root Dir where the results to be saved
     el["RootDir"]="/scratch/ggunay/TrialReal/RealData2"
     el["resultsRootDir"]=el["RootDir"]+"/ExpResults/PCE"
@@ -127,6 +126,39 @@ def setupEnvRealData(el):
     el["movingSegmentationDT"]=el["segDatasetPath"]+"/Pre_dtout.mhd"
     el["movingIm"]=el["movingDatasetPath"]+"/Pre.mhd"
 
+def setupEnvSimulatedData(el):
+     #Root Dir where the results to be saved
+    el["RootDir"]=SelfPath
+    el["resultsRootDir"]=el["RootDir"]+"/ExpResults/PCE"
+    #Rootdir where registration results to be saved
+    el["registRootDir"]=el["resultsRootDir"]
+    #Path of Intra dataset
+    el["fixedDatasetPath"]=el["RootDir"]+"/TestImages"
+    #Path of Pre dataset
+    el["movingDatasetPath"]=el["RootDir"]+"/TestImages"
+    #Path of segmentation dataset
+    el["segDatasetPath"]=el["RootDir"]+"/TestImages"
+
+    #Rigid registration parameter file template
+    el["rigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/RigidparaPI.txt"
+    #Nonrigid registration parameter file template
+    el["nonRigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/Nonrigidpara2ndStep.txt"
+    #Example settings for PCE execution model
+    el["PceSetInstanceFile"]=el["RootDir"]+"/ParameterFiles/PceParamInstance.json"
+    
+    #Path of PCE executable
+    el["PCE_ExePath"]=SelfPath+"/MatlabScripts"
+    #Name of the PCE executable
+    el["PCE_ExeName"]="pceExe"
+    #PCE executable
+    el["PCE_Exe"]=el["PCE_ExePath"]+"/"+el["PCE_ExeName"]
+    #Settings file for PCE execution model
+    el["PCE_ModelSetRunFile"]=el["PCE_ExePath"]+"/PCE_Settings.json"
+    #Elastix executable 
+    el["elastixExe"]="/scratch/ggunay/Tools/elastix/src/bin/elastix"
+    #Transformix executable
+    el["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
+    el["Pce_WeightFile"]=el["registRootDir"]+"/PceWeights.txt"
 
 def runSimulated():
     
@@ -143,18 +175,6 @@ def runSimulated():
     
     """"[ParamName,ParamDist,Param,ParamMean,ParamStd]"""
     """For uniform distribution ParamMean is the lower, ParamStd is the higher dist. boundary"""
-
-    """Simulated Dataset"""
-    par1=PR("Metric1Weight","gauss",4.12,2.65)
-    
-    """Simulated Dataset"""
-    par2=PR("FinalGridSpacingInPhysicalUnits","gauss",4.37,0.55)
-
-    par1.setValMapFunct(lambda a:pow(2,a)) 
-    pce.addParam(par1)
-    
-    par2.setValMapFunct(lambda a:pow(2,a))
-    pce.addParam(par2)
         
     pce.setQuadratureType("gauss")
     pce.setGridType("sparse")
@@ -169,19 +189,24 @@ def runSimulated():
     Format: {"Image Name in the dataset table":{"name":Real image name,"file":Image file name with full path}}
         Image file name =Images["Image Name in the dataset table"]["file"]
     """
-    fixedImages=Images.getFixedImages()
-    movingImages=Images.getMovingImages()
-    
-    for ind in movingImages:
+
+    Data = Dataset()
+    """
+    Here we assert which uncertainies will be produced using Sobol decomposition.
+    """
+    pce["uncertaintyGroup"] = "1-2-1_2-all"
+    for ind in range(0, Data.getDatasetNumber()):
+        it = Data.getDatasetWithIndex(ind)
         for ind2 in [3]:
             for ind3 in [3]:
                 pce.setPolOrder(ind2)
                 pce.setGridLevel(ind3)
                 
-                pce["fixedIm"]=fixedImages["Image0"]["file"]
-                pce["movingIm"]=movingImages[ind]["file"]     
+                pce["fixedIm"] = it["fixedIm"]
+                pce["movingIm"] = it["movingIm"]
+                pce.setParams(it["parameters"])
                 
-                pce["RegMainDir"]=pce["registRootDir"]+"/"+movingImages[ind]["name"]+"/""Gl"+str(ind2)+"Po"+str(ind3)
-                pce.run(False,True)
+                pce["RegMainDir"]=pce["registRootDir"]+"/Dataset"+str(ind)+"/""Gl"+str(ind2)+"Po"+str(ind3)
+                pce.run(False, True)
 
 runSimulated()
