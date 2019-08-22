@@ -22,7 +22,7 @@
 import sys,time,os
 import lib.Param as PR
 import lib.MonteCarlo as MC
-import DatasetsAndParameters.Dataset as Dataset
+from DatasetsAndParameters import Dataset
 
 if sys.version_info[0]==3:
     import subprocess
@@ -106,7 +106,8 @@ def runSimulated():
     mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
     mc.setWaitClusterFunc(waitCluster)
-    for it in Data:
+    for ind in range(0, Data.getDatasetNumber()):
+        it = Data.getDatasetWithIndex(ind)
         mc["fixedIm"] = it["fixedIm"]
         mc["movingIm"] = it["movingIm"]
         mc.setParams(it["parameters"])

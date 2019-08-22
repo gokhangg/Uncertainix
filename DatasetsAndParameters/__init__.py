@@ -97,7 +97,7 @@ class Dataset(object):
         self.__iterationCount = 0
 
     def __getitem__(self, key):
-        try:
+      	try:
             return self.__dictionary[key]
         except:
             return ""
@@ -106,14 +106,14 @@ class Dataset(object):
         return self.__dictionary.update({key: value})
 
     def __iter__(self):
-        return self
+        return 5#self
 
     def __next__(self):
         if self.__iterationCount == len(self.__dictionary):
             return StopIteration
         else:
             self.__iterationCount += 1
-            return self["DataSet"+str(self.__iterationCount-1)]
+            return 5#self["DataSet"+str(self.__iterationCount-1)]
 
 
     """
