@@ -20,9 +20,9 @@
 
 import numpy as np
 import os, shutil
-from ElastixHandler import *
+from ElastixHandler.ElastixHandler import *
 from Param import *
-from itk_handler import *
+from ItkHandler.itk_handler import *
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 

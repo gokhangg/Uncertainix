@@ -29,19 +29,19 @@ class PceHandler(Elastix):
     
     def __init__(self):
         super(PceHandler, self).__init__()
-        self.__sampleNum=10
-        self.__paramsToAnalyze=[]
-        self.__polOrd=1
-        self.__gridLevel=1
-        self.__quadratureType=[]
-        self.__gridType="sparse"
-        self.__trim="1"
-        self.__removeSmallElements="1"
-        self.__smallElementThresh="1e-13"
-        self.__selfParams={}
-        self.__clusterWaitFunc=lambda:True
-        self.__paramValTransFunc=lambda params:params
-        self.__loadFrompreviousRun=False
+        self.__sampleNum = 10
+        self.__paramsToAnalyze = []
+        self.__polOrd = 1
+        self.__gridLevel = 1
+        self.__quadratureType = []
+        self.__gridType = "sparse"
+        self.__trim = "1"
+        self.__removeSmallElements = "1"
+        self.__smallElementThresh = "1e-13"
+        self.__selfParams = {}
+        self.__clusterWaitFunc = lambda:True
+        self.__paramValTransFunc = lambda params:params
+        self.__loadFrompreviousRun = False
     
     """
     @brief: Runs PCE.
@@ -51,7 +51,7 @@ class PceHandler(Elastix):
             on computation cluster.
     @return: NA.
     """        
-    def run(self,rigOnCluster=False,nonRigOnCluster=False):
+    def run(self,rigOnCluster = False, nonRigOnCluster = False):
         self.elastixOnCluster(rigOnCluster)
         self.runRig()
         self.generatePceParamFile()
@@ -68,17 +68,18 @@ class PceHandler(Elastix):
     @return: NA.
     """   
     def getStd(self):
-        self["stdImageFile"]=self["RegMainDir"]+"/stdImage.mhd"
-        for cnt in range(0,self.__sampleNum):
-            self["defFieldDir"]=self["RegMainDir"]+"/NonRigid/Transformix"+str(cnt)
-            self["nonRigRegDir"]=self["RegMainDir"]+"/NonRigid/Elastix"+str(cnt)
+        self["stdImageFile"] = self["RegMainDir"]+"/stdImage.mhd"
+        for cnt in range(0, self.__sampleNum):
+            self["defFieldDir"] = self["RegMainDir"] + "/NonRigid/Transformix" + str(cnt)
+            self["nonRigRegDir"] = self["RegMainDir"] + "/NonRigid/Elastix" + str(cnt)
             self.getDeformationField()
-        cmd=self["prePceCommands"]
-        cmd+=self["PCE_Exe"]+" -rootDir "+self["RegMainDir"]+" -verbose -uncertainty "+self["uncertaintyGroup"]+" -sobol "+"-polOrderFile "+" -outDir "+self["RegMainDir"]+" -settingsFile "+self["PCE_ModelSetRunFile"]+" -runPCE "
-        cmd+=self["postPceCommands"]
+        cmd = self["prePceCommands"]
+        cmd += self["PCE_Exe"] + " -rootDir " + self["RegMainDir"] + " -verbose -uncertainty " + self["uncertaintyGroup"] \
+               + " -sobol " + "-polOrderFile " + " -outDir " + self["RegMainDir"] + " -settingsFile " + self["PCE_ModelSetRunFile"] + " -runPCE "
+        cmd += self["postPceCommands"]
         os.system(cmd)
-        for cnt in range(0,self.__sampleNum):
-            self["defFieldDir"]=self["RegMainDir"]+"/NonRigid/Transformix"+str(cnt)
+        for cnt in range(0, self.__sampleNum):
+            self["defFieldDir"] = self["RegMainDir"] + "/NonRigid/Transformix" + str(cnt)
             shutil.rmtree(self["defFieldDir"])
 
     """
@@ -95,32 +96,32 @@ class PceHandler(Elastix):
     @return: NA.
     """    
     def loadParamVals(self, file=""):
-        if file=="":
-            file=self["resultsRootDir"]+"/ParamVals.txt"
+        if file == "":
+            file = self["resultsRootDir"]+"/ParamVals.txt"
         if not os.path.isfile(file):
             assert("there is no file with the given name")   
-        fl=open(file,"r")
-        ln=fl.readlines()
+        fl = open(file,"r")
+        ln = fl.readlines()
         fl.close()
         self.__paramsToAnalyze=[]
         for it in ln:
-            if it=="Param\n":
-                self.__paramsToAnalyze+=[Param()]
+            if it == "Param\n":
+                self.__paramsToAnalyze += [Param()]
             elif it.count("Name"):
-                self.__paramsToAnalyze[-1:][0].setName(it[len("Name")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setName(it[len("Name") + 1:-1])
             elif it.count("Dist"):
-                self.__paramsToAnalyze[-1:][0].setDist(it[len("Dist")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setDist(it[len("Dist") + 1:-1])
             elif it.count("Mean"):
-                self.__paramsToAnalyze[-1:][0].setMean(it[len("Mean")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setMean(it[len("Mean") + 1:-1])
             elif it.count("Std"):
-                self.__paramsToAnalyze[-1:][0].setStd(it[len("Std")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setStd(it[len("Std") + 1:-1])
             elif it.count("HighBnd"):
-                self.__paramsToAnalyze[-1:][0].setHighBnd(it[len("HighBnd")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setHighBnd(it[len("HighBnd") + 1:-1])
             elif it.count("LowBnd"):
-                self.__paramsToAnalyze[-1:][0].setLowBnd(it[len("LowBnd")+1:-1])
+                self.__paramsToAnalyze[-1:][0].setLowBnd(it[len("LowBnd") + 1:-1])
             elif it.count("Size"):
                 continue
-            elif not it=="\n":
+            elif not it == "\n":
                 self.__paramsToAnalyze[-1:][0].addRandVal(it)
                 continue
     
@@ -129,25 +130,25 @@ class PceHandler(Elastix):
     @param: file File name to save.
     @return: NA.
     """
-    def saveParamVals(self, file=""):
-        if file=="":
-            dr=self["resultsRootDir"]
+    def saveParamVals(self, file = ""):
+        if file == "":
+            dr = self["resultsRootDir"]
             if not os.path.isdir(dr):
                 os.makedirs(dr)
-            file=dr+"/ParamVals.txt"
-        fl=open(file,"w")
+            file = dr + "/ParamVals.txt"
+        fl=open(file, "w")
         for it in self.__paramsToAnalyze:
             fl.writelines("Param\n")
-            fl.writelines("Name "+it.getName()+"\n")
-            fl.writelines("Dist "+it.getDist()+"\n")
-            fl.writelines("Mean "+str(it.getMean())+"\n")
-            fl.writelines("Std "+str(it.getStd())+"\n")
-            fl.writelines("HighBnd "+str(it.getHighBnd())+"\n")
-            fl.writelines("HighBnd "+str(it.getLowBnd())+"\n")
-            fl.writelines("Size "+str(it.getSize())+"\n")
-            vals=it.getRandVal()
+            fl.writelines("Name " + it.getName() + "\n")
+            fl.writelines("Dist " + it.getDist() + "\n")
+            fl.writelines("Mean " + str(it.getMean()) + "\n")
+            fl.writelines("Std " + str(it.getStd()) + "\n")
+            fl.writelines("HighBnd " + str(it.getHighBnd()) + "\n")
+            fl.writelines("HighBnd " + str(it.getLowBnd()) + "\n")
+            fl.writelines("Size " + str(it.getSize()) + "\n")
+            vals = it.getRandVal()
             for i in vals:
-                fl.writelines(str(i)+"\n")
+                fl.writelines(str(i) + "\n")
             fl.writelines("\n")
         fl.close()
     
@@ -157,39 +158,39 @@ class PceHandler(Elastix):
     @return: NA.
     """
     def generatePceParamFile(self):
-        ln="{\n"
-        ln+="\"pol_order\" : \""+str(self.getPolOrder())+"\",\n"
-        ln+="\"grid_level\" : \""+str(self.getGridLevel())+"\",\n"
+        ln = "{\n"
+        ln += "\"pol_order\" : \"" + str(self.getPolOrder()) + "\",\n"
+        ln += "\"grid_level\" : \"" + str(self.getGridLevel()) + "\",\n"
         
-        ln+="\"quadrature_type\" : ["
-        quadType=self.getQuadratureType()
-        for ind,it in enumerate(quadType):
-            if not ind==0:
-                ln+=","
-            ln+="\""+it+"\""
-        ln+="],\n"
+        ln += "\"quadrature_type\" : ["
+        quadType = self.getQuadratureType()
+        for ind, it in enumerate(quadType):
+            if not ind == 0:
+                ln += ","
+            ln += "\"" + it + "\""
+        ln += "],\n"
             
-        polType=self.getPolType()
-        ln+="\"pol_type\" : ["
-        for ind,it in enumerate(polType):
-            if not ind==0:
-                ln+=","
-            ln+="\""+it+"\""
-        ln+="],\n"
+        polType = self.getPolType()
+        ln += "\"pol_type\" : ["
+        for ind, it in enumerate(polType):
+            if not ind == 0:
+                ln += ","
+            ln += "\"" + it + "\""
+        ln += "],\n"
         
-        ln+="\"grid_type\" : \""+str(self.getGridType())+"\",\n"
-        ln+="\"trim\" : \""+str(self.getTrim())+"\",\n"
-        ln+="\"remove_small_elements\" : \""+str(self.getRemoveSmallElements())+"\",\n"
-        ln+="\"small_element_threshold\" : \""+str(self.getSmallElementThresh())+"\",\n"
-        stdDev=self.getStdDevs()
-        ln+="\"std_devs\" : ["
-        for ind,it in enumerate(stdDev):
-            if not ind==0:
-                ln+=","
-            ln+="\""+str(it)+"\""
-        ln+="]\n}"
-        fl=open(self["PCE_ModelSetRunFile"],"w")
-        ln=fl.writelines(ln)
+        ln += "\"grid_type\" : \"" + str(self.getGridType()) + "\",\n"
+        ln += "\"trim\" : \"" + str(self.getTrim()) + "\",\n"
+        ln += "\"remove_small_elements\" : \"" + str(self.getRemoveSmallElements()) + "\",\n"
+        ln += "\"small_element_threshold\" : \"" + str(self.getSmallElementThresh()) + "\",\n"
+        stdDev = self.getStdDevs()
+        ln += "\"std_devs\" : ["
+        for ind, it in enumerate(stdDev):
+            if not ind == 0:
+                ln += ","
+            ln += "\"" + str(it) + "\""
+        ln += "]\n}"
+        fl = open(self["PCE_ModelSetRunFile"],"w")
+        ln = fl.writelines(ln)
         fl.close() 
     
     """
@@ -197,26 +198,26 @@ class PceHandler(Elastix):
     @return: NA.
     """
     def generatePceParamFileFromInstance(self):
-        fl=open(self["PceSetInstanceFile"],"r")
-        ln=fl.readlines()
+        fl = open(self["PceSetInstanceFile"], "r")
+        ln = fl.readlines()
         fl.close()
-        for cnt in range(0,len(ln)):
-            if ln[cnt].count("quadrature_type")>0:
-                ln[cnt]="\"quadrature_type\" : ["
-                for ind,it in enumerate(self.__paramsToAnalyze):
-                    if not ind==0:
-                        ln[cnt]+=","
-                    ln[cnt]+="\"gauss-"+self.__getPolType(it.getDist())+"\""
-                ln[cnt]+="],\n"
-            if ln[cnt].count("std_devs")>0:
-                ln[cnt]="\"std_devs\" : ["
-                for ind,it in enumerate(self.__paramsToAnalyze):
-                    if not ind==0:
-                        ln[cnt]+=","
-                    ln[cnt]+="\""+str(it.getStd())+"\""
-                ln[cnt]+="],\n" 
-        fl=open(self["PCE_ModelSetRunFile"],"w")
-        ln=fl.writelines(ln)
+        for cnt in range(0, len(ln)):
+            if ln[cnt].count("quadrature_type") > 0:
+                ln[cnt] = "\"quadrature_type\" : ["
+                for ind, it in enumerate(self.__paramsToAnalyze):
+                    if not ind == 0:
+                        ln[cnt] += ","
+                    ln[cnt] += "\"gauss-" + self.__getPolType(it.getDist()) + "\""
+                ln[cnt] += "],\n"
+            if ln[cnt].count("std_devs") > 0:
+                ln[cnt] = "\"std_devs\" : ["
+                for ind, it in enumerate(self.__paramsToAnalyze):
+                    if not ind == 0:
+                        ln[cnt] += ","
+                    ln[cnt] += "\"" + str(it.getStd()) + "\""
+                ln[cnt] += "],\n"
+        fl = open(self["PCE_ModelSetRunFile"], "w")
+        ln = fl.writelines(ln)
         fl.close()            
     
     """
@@ -224,9 +225,9 @@ class PceHandler(Elastix):
     @return: NA.
     """    
     def generateWeightFile(self):
-        cmd=self["prePceCommands"]
-        cmd+=self["PCE_Exe"]+" -settingsFile "+self["PCE_ModelSetRunFile"]+" -writePceWeights "+self["Pce_WeightFile"]
-        cmd+=self["postPceCommands"]
+        cmd = self["prePceCommands"]
+        cmd += self["PCE_Exe"] + " -settingsFile " + self["PCE_ModelSetRunFile"] + " -writePceWeights " + self["Pce_WeightFile"]
+        cmd += self["postPceCommands"]
         os.system(cmd)
     
     """
@@ -234,7 +235,7 @@ class PceHandler(Elastix):
     @return: NA.
     """ 
     def runRig(self):
-        self["rigRegDir"]=self["RegMainDir"]+"/Rigid"
+        self["rigRegDir"] = self["RegMainDir"] + "/Rigid"
         if not os.path.exists(self["rigRegDir"]):
             os.makedirs(self["rigRegDir"])
         self.rigidElasRun()
@@ -243,16 +244,16 @@ class PceHandler(Elastix):
     @brief: Runs nonrigid registration.
     @return: NA.
     """ 
-    def runNonRigSingle(self,ind):
-        self["nonRigRegDir"]=self["RegMainDir"]+"/NonRigid/Elastix"+str(ind)
-        paramDict={}
-        elasParamDict={}
+    def runNonRigSingle(self, ind):
+        self["nonRigRegDir"] = self["RegMainDir"] + "/NonRigid/Elastix" + str(ind)
+        paramDict = {}
+        elasParamDict = {}
         for it in self.__paramsToAnalyze:
             paramDict.update({it.getName():it.getVals()[ind]})
-            registrationParams=it["registrationParams"]
+            registrationParams = it["registrationParams"]
             for it2 in registrationParams:
                 elasParamDict.update({it2:registrationParams[it2]})
-        self.nonRigidElasRun(paramDict,elasParamDict)
+        self.nonRigidElasRun(paramDict, elasParamDict)
     
     """
     @brief: Loads parameter values from a file with name embedded in 
@@ -260,19 +261,19 @@ class PceHandler(Elastix):
     @return: NA.
     """            
     def loadWeightFromFile(self):
-        fl=open(self["Pce_WeightFile"],"r")
-        ln=fl.readlines()
+        fl = open(self["Pce_WeightFile"], "r")
+        ln = fl.readlines()
         fl.close()
         self.setSampleNumber(int(ln[0]))
-        weights=[]
-        for ind in range(0,self.__sampleNum):
-            weights+=[ln[ind+1].split(",")]
-        weights=list(map(list, zip(*weights)))
+        weights = []
+        for ind in range(0, self.__sampleNum):
+            weights += [ln[ind + 1].split(",")]
+        weights = list(map(list, zip(*weights)))
         
-        for ind,it in enumerate(self.__paramsToAnalyze):
+        for ind, it in enumerate(self.__paramsToAnalyze):
             it.resetVal()
-            for ind2 in range(0,self.__sampleNum):
-                it.addVal(float(weights[ind][ind2])+it.getMean())
+            for ind2 in range(0, self.__sampleNum):
+                it.addVal(float(weights[ind][ind2]) + it.getMean())
             it.mapVal()
             
     """
@@ -288,7 +289,7 @@ class PceHandler(Elastix):
     @return: NA.
     """   
     def transParamVals(self):
-        self.__weightsLs=self.__paramValTransFunc(self.__weightsLs)
+        self.__weightsLs = self.__paramValTransFunc(self.__weightsLs)
       
     """
     @brief: Returns polynomial type of distributions.
@@ -296,11 +297,11 @@ class PceHandler(Elastix):
     @return: Polynomial type.
     """
     def __getPolType(self,dist):
-        if dist=="gauss":
+        if dist == "gauss":
             return "hermite"
-        elif dist=="exponential":
+        elif dist == "exponential":
             return "laguerre"
-        elif self.__dist=="uniform":
+        elif self.__dist == "uniform":
             return "legendre"
         else:
             return ""
@@ -310,8 +311,8 @@ class PceHandler(Elastix):
     @param: param Parameter to be added.
     @return: NA.
     """
-    def addParam(self,param):
-        self.__paramsToAnalyze+=[param]
+    def addParam(self, param):
+        self.__paramsToAnalyze += [param]
     
     """
     @brief: Returns parameters to be analyzed.
@@ -321,9 +322,9 @@ class PceHandler(Elastix):
         return self.__paramsToAnalyze
 
     """
-            @brief: Sets all parameters in the analysis.
-            @param: params Parameters to be set.
-            @return: All parameters.
+    @brief: Sets all parameters in the analysis.
+    @param: params Parameters to be set.
+    @return: All parameters.
     """
     def setParams(self, params):
         self.__paramsToAnalyze = params
@@ -333,56 +334,56 @@ class PceHandler(Elastix):
     @param: order Polynomial order.
     @return: NA.
     """
-    def setPolOrder(self,order):
-        self.__polOrd=order
+    def setPolOrder(self, order):
+        self.__polOrd = order
     
     """
     @brief: Sets grid level.
     @param: level Grid level.
     @return: NA.
     """
-    def setGridLevel(self,level):
-        self.__gridLevel=level
+    def setGridLevel(self, level):
+        self.__gridLevel = level
     
     """
     @brief: Sets quadrature type.
     @param: quadType Quadrature type.
     @return: NA.
     """
-    def setQuadratureType(self,quadType):
-        self.__quadratureType=quadType
+    def setQuadratureType(self, quadType):
+        self.__quadratureType = quadType
     
     """
     @brief: Sets grid type.
     @param: typ Grid type.
     @return: NA.
     """
-    def setGridType(self,typ):
-        self.__gridType=typ
+    def setGridType(self, typ):
+        self.__gridType = typ
     
     """
     @brief: Sets trim value.
     @param: trm Trim value.
     @return: NA.
     """
-    def setTrim(self,trm):
-        self.__trim=trm
+    def setTrim(self, trm):
+        self.__trim = trm
     
     """
     @brief: Sets remove small elements token in the PCE settings.
     @param: rem Token for removal.
     @return: NA.
     """
-    def setRemoveSmallElements(self,rem):
-        self.__removeSmallElements=rem
+    def setRemoveSmallElements(self, rem):
+        self.__removeSmallElements = rem
     
     """
     @brief: Sets threshold for small elements token in the PCE settings.
     @param: thresh Threshold value.
     @return: NA.
     """
-    def setSmallElementThresh(self,thresh):
-        self.__smallElementThresh=thresh
+    def setSmallElementThresh(self, thresh):
+        self.__smallElementThresh = thresh
     
     """
     @brief: Returns polynomial order.
@@ -403,10 +404,10 @@ class PceHandler(Elastix):
     @return: Quadrature type.
     """
     def getQuadratureType(self):
-        quadType=[]
-        polType=self.getPolType()
+        quadType = []
+        polType = self.getPolType()
         for it in polType:
-            quadType+=[self.__quadratureType+"-"+it]
+            quadType += [self.__quadratureType + "-" + it]
         return quadType
     
     """
@@ -414,9 +415,9 @@ class PceHandler(Elastix):
     @return: Polynomial types of the parameter to be analyzed.
     """    
     def getPolType(self):
-        polType=[]
+        polType = []
         for it in self.__paramsToAnalyze:
-            polType+=[self.__getPolType(it.getDist())]
+            polType += [self.__getPolType(it.getDist())]
         return polType
     
     """
@@ -452,9 +453,9 @@ class PceHandler(Elastix):
     @return: Standard deviations of the parameters ot be analyzed.
     """
     def getStdDevs(self):
-        stdDevs=[]
+        stdDevs = []
         for it in self.__paramsToAnalyze:
-            stdDevs+=[str(it.getStd())]
+            stdDevs += [str(it.getStd())]
         return stdDevs
     
     """
@@ -462,8 +463,8 @@ class PceHandler(Elastix):
     @param: waitFunc Waiting function.
     @return: NA.
     """   
-    def setClusterWaitFunc(self,waitFunc):
-        self.__clusterWaitFunc=waitFunc
+    def setClusterWaitFunc(self, waitFunc):
+        self.__clusterWaitFunc = waitFunc
 
     """
         @brief: Sets sample number.
@@ -491,8 +492,8 @@ class PceHandler(Elastix):
     """
     @brief: Assigns value for verbose execution.
     """
-    def setVerbose(self,verb=False):
-        self.__verbose=verb
+    def setVerbose(self, verb = False):
+        self.__verbose = verb
     
     """
     @brief: Sets a function mapping values of the parameter.
@@ -501,13 +502,13 @@ class PceHandler(Elastix):
     @param: func A function to map the parameter values.
     @return: NA.
     """
-    def setParamValTransFunc(self,func):
-        self.__paramValTransFunc=func
+    def setParamValTransFunc(self, func):
+        self.__paramValTransFunc = func
     
     """
     @brief: Sets an internal token for loading parameters from previous run.
     @param: fromPrevious Binary value to set the internal token.
     @return: NA.
     """
-    def loadParamsFromPreviousRun(self,fromPrevious=False):
-        self.__loadFrompreviousRun=fromPrevious  
+    def loadParamsFromPreviousRun(self, fromPrevious = False):
+        self.__loadFrompreviousRun = fromPrevious

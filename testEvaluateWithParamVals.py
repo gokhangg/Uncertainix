@@ -11,11 +11,11 @@ else:
     exeGetOutput=commands.getoutput
 
 sys.path.append("./Uncertainix")
-sys.path.append("./Uncertainix/lib")
+sys.path.append("./Uncertainix/Misc")
 sys.path.append("./Uncertainix/TestImages")
 selfPath=os.path.dirname(os.path.realpath(__file__))
 
-import lib
+import Misc
 import TestImages as Images
 
 """
@@ -109,14 +109,14 @@ def setupEnvSimulatedDataPCE(el):
     el["Pce_WeightFile"] = el["registRootDir"] + "/PceWeights.txt"
 
 def runExperiment(pixelLoc):
-    mc = lib.MonteCarlo()
+    mc = Misc.MonteCarlo()
     setupEnvSimulatedData(mc)
     mc["RegMainDir"] = mc["registRootDir"]
 
     """Simulated Dataset"""
-    par1 = lib.Param("Metric1Weight", "gauss", 4.12, 2.65)
+    par1 = Misc.Param("Metric1Weight", "gauss", 4.12, 2.65)
     """Simulated Dataset"""
-    par2 = lib.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
+    par2 = Misc.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
 
     rangePar1 = getgetSamplePointsRange(par1.getMean(), par1.getStd(), sampNum)
     rangePar2 = getgetSamplePointsRange(par2.getMean(), par2.getStd(), sampNum)
@@ -174,22 +174,22 @@ def runExperiment(pixelLoc):
 
 
 def runExperimentPCE(pixelLoc):
-    compiler = lib.MatlabExeCompiler()
+    compiler = Misc.MatlabExeCompiler()
     compiler["preCommands"]="module load matlab & module load mcr &"
     compiler["postCommands"]=""
     compiler.compileMatlabExe()
 
-    pce = lib.PceHandler()
+    pce = Misc.PceHandler()
     pce["prePceCommands"] = "module load matlab & module load mcr &"
     pce["postPceCommands"] = ""
     setupEnvSimulatedDataPCE(pce)
     pce.isVerbose(True)
 
     """Simulated Dataset"""
-    par1 = lib.Param("Metric1Weight", "gauss", 4.12, 2.65)
+    par1 = Misc.Param("Metric1Weight", "gauss", 4.12, 2.65)
 
     """Simulated Dataset"""
-    par2 = lib.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
+    par2 = Misc.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
 
     rangePar1 = getgetSamplePointsRange(0, par1.getStd(), sampNum)
     rangePar2 = getgetSamplePointsRange(0, par2.getStd(), sampNum)
@@ -281,11 +281,11 @@ else:
     exeGetOutput=commands.getoutput
 
 sys.path.append("./Uncertainix")
-sys.path.append("./Uncertainix/lib")
+sys.path.append("./Uncertainix/Misc")
 sys.path.append("./Uncertainix/TestImages")
 selfPath=os.path.dirname(os.path.realpath(__file__))
 
-import lib
+import Misc
 import TestImages as Images
 
 """
@@ -379,14 +379,14 @@ def setupEnvSimulatedDataPCE(el):
     el["Pce_WeightFile"] = el["registRootDir"] + "/PceWeights.txt"
 
 def runExperiment():
-    mc = lib.MonteCarlo()
+    mc = Misc.MonteCarlo()
     setupEnvSimulatedData(mc)
     mc["RegMainDir"] = mc["registRootDir"]
 
     """Simulated Dataset"""
-    par1 = lib.Param("Metric1Weight", "gauss", 4.12, 2.65)
+    par1 = Misc.Param("Metric1Weight", "gauss", 4.12, 2.65)
     """Simulated Dataset"""
-    par2 = lib.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
+    par2 = Misc.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
 
     rangePar1 = getgetSamplePointsRange(par1.getMean(), par1.getStd(), sampNum)
     rangePar2 = getgetSamplePointsRange(par2.getMean(), par2.getStd(), sampNum)
@@ -437,22 +437,22 @@ def runExperiment():
     return sampleMesh, mc
 
 def runExperimentPCE():
-    compiler = lib.MatlabExeCompiler()
+    compiler = Misc.MatlabExeCompiler()
     compiler["preCommands"]="module load matlab & module load mcr &"
     compiler["postCommands"]=""
     compiler.compileMatlabExe()
 
-    pce = lib.PceHandler()
+    pce = Misc.PceHandler()
     pce["prePceCommands"] = "module load matlab & module load mcr &"
     pce["postPceCommands"] = ""
     setupEnvSimulatedDataPCE(pce)
     pce.isVerbose(True)
 
     """Simulated Dataset"""
-    par1 = lib.Param("Metric1Weight", "gauss", 4.12, 2.65)
+    par1 = Misc.Param("Metric1Weight", "gauss", 4.12, 2.65)
 
     """Simulated Dataset"""
-    par2 = lib.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
+    par2 = Misc.Param("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
 
     rangePar1 = getgetSamplePointsRange(0, par1.getStd(), sampNum)
     rangePar2 = getgetSamplePointsRange(0, par2.getStd(), sampNum)

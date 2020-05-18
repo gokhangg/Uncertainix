@@ -19,8 +19,8 @@
 # *=========================================================================
 
 import sys,time,os
-import lib.PceHandler as PCE
-import lib.MatlabExeCompiler as MatlabCompiler
+import PceHandler.PceHandler as PCE
+import Misc.MatlabExeCompiler as MatlabCompiler
 from DatasetsAndParameters import Dataset
 
 if sys.version_info[0]==3:

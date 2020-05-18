@@ -19,12 +19,12 @@
 # *=========================================================================
 
 import os, sys
-import lib.Param as Par
+import Misc.Param as Par
 
 selfPath=os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(0, "./lib")
-sys.path.insert(0, "../lib")
+sys.path.insert(0, "./Misc")
+sys.path.insert(0, "../Misc")
 
 class zipIterator:
     def __init__(self, val):
