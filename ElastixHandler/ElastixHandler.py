@@ -18,7 +18,7 @@
 # *  the License.
 # *=========================================================================
 
-import re, shutil
+import re, shutil, os
 
 import sys
 if sys.version_info[0] == 3:
@@ -28,7 +28,7 @@ else:
     import commands
     exeGetOutput = commands.getoutput
 
-from ElastixHandler.EnvSetup import*
+from EnvSetup import Environment
 
 class Elastix(Environment):
     __verbose = False

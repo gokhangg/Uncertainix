@@ -21,42 +21,42 @@
 
 import sys, time, os
 import MonteCarloHandler.MonteCarlo as MC
-from DatasetsAndParameters import Dataset
+from temp.SynteticImages import Dataset
 
 if sys.version_info[0] == 3:
     import subprocess
-    exeGetOutput=subprocess.getoutput
+    exeGetOutput = subprocess.getoutput
 else:
     import commands
     exeGetOutput = commands.getoutput
 
 SelfPath = os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(0,"./Misc")
-sys.path.insert(0,"../Misc")
+sys.path.insert(0, "./Misc")
+sys.path.insert(0, "../Misc")
 
 """
 @brief: It just waits till end of all 
         jobs of the user.
 @Note:  Experiments were executed on the BIGR cluster facility and this 
         method is wait function for this cluster. Therefore, for a different
-        cluster this method should be revisiteda dn modified.
+        cluster this method should be revisited and modified.
 """
 def waitCluster():
-    Qstat=exeGetOutput("qstat ")
+    Qstat = exeGetOutput("qstat ")
     cnt = 0
-    while Qstat.count("\n")>1:
-        Qstat=exeGetOutput("qstat ")
-        if not cnt==Qstat.count("\n"):
-            cnt=Qstat.count("\n")
-            print("Remaining Task ",cnt-1)
+    while Qstat.count("\n") > 1:
+        Qstat = exeGetOutput("qstat ")
+        if not cnt == Qstat.count("\n"):
+            cnt = Qstat.count("\n")
+            print("Remaining Task ", cnt - 1)
         time.sleep(2)  
 
 
 def setupEnvSimulatedData(el):
      #Root Dir where the results to be saved
     el["RootDir"] = SelfPath
-    el["resultsRootDir"] = el["RootDir"] + "/ExpResults/MC"
+    el["resultsRootDir"] = el["RootDir"] + "/temp/ExpResults/MC"
     #Rootdir where registration results to be saved
     el["registRootDir"] = el["resultsRootDir"]
     #Path of Intra dataset
@@ -82,9 +82,9 @@ def setupEnvSimulatedData(el):
     #Settings file for PCE execution model
     el["PCE_ModelSetRunFile"] = el["PCE_ExePath"] + "/PCE_Settings.json"
     #Elastix executable 
-    el["elastixExe"] = "/scratch/ggunay/Tools/elastix/src/bin/elastix"
+    el["elastixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/elastix"
     #Transformix executable
-    el["transformixExe"] = "/scratch/ggunay/Tools/elastix/src/bin/transformix"
+    el["transformixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/transformix"
     el["Pce_WeightFile"] = el["registRootDir"] + "/PceWeights.txt"
     
 def runSimulated():
@@ -99,17 +99,20 @@ def runSimulated():
     """For uniform distribution ParamMean is the lower, ParamStd is the higher dist. boundary"""
 
     Data = Dataset()
+
+    mc["rigidParaTemplate"] = Data.getRegistrationParameters()["RigidParamFile"]
+    mc["nonRigidParaTemplate"] = Data.getRegistrationParameters()["NonRigidParamFile"]
     
     clusterProcessNumberUppperLimit = 50
     
-    mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
-    mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
-    mc.setWaitClusterFunc(waitCluster)
+    #mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
+    #mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
+    #mc.setWaitClusterFunc(waitCluster)
     for ind in range(0, Data.getDatasetNumber()):
         it = Data.getDatasetWithIndex(ind)
         mc["fixedIm"] = it["fixedIm"]
         mc["movingIm"] = it["movingIm"]
         mc.setParams(it["parameters"])
         mc["RegMainDir"] = mc["registRootDir"] + "/Dataset" + str(ind)
-        mc.run(W, clusterProcessNumberUppperLimit, False, True, False)
+        mc.run(W)
 runSimulated()

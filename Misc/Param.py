@@ -106,7 +106,7 @@ class Param(object):
     @return: NA.
     """
     def mapVal(self):
-        self.__vals=self.__transFunct(self.__vals)   
+        self.__vals = self.__transFunct(self.__vals)
         
     """
     @brief: Sets a function mapping values of the parameter.

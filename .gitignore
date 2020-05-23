@@ -2,7 +2,7 @@
 *.rar
 *.e
 *.o
-ExpResults/
+temp/
 
 *.pyc
 .idea/

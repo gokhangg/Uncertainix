@@ -21,7 +21,7 @@
 import numpy as np
 import os, shutil
 from ElastixHandler.ElastixHandler import *
-from Param import *
+from Misc.Param import *
 from ItkHandler.itk_handler import *
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
@@ -40,10 +40,10 @@ class MonteCarlo(Elastix):
         self.__randVarTypeArr = ["gauss"]
         self.__paramsToAnalyze = []
         self.__selfParams = {}
-        self.__waitClusterFunc = lambda param: param
         self.__loadFrompreviousRun = False
         self.__clusterBatchLim = 100
         self.__itk_handler = itk_handler()
+        self.__waitClusterFunc = lambda :0
 
     """
     @brief: Runs the experiment.
@@ -57,7 +57,7 @@ class MonteCarlo(Elastix):
     @note: This method may be changed in accordance with user's desire.
     """
 
-    def run(self, sampleNum=0, clusterBatchLim=50, transformixOnCluster=False, nonRigOnCluster=False,
+    def run(self, sampleNum = 0, clusterBatchLim=50, transformixOnCluster=False, nonRigOnCluster=False,
             rigOnCluster=False):
         self.setSampleNum(sampleNum)
         self.generateParamVals()
@@ -188,6 +188,7 @@ class MonteCarlo(Elastix):
             registrationParams = it["registrationParams"]
             for it2 in registrationParams:
                 elasParamDict.update({it2: registrationParams[it2]})
+        print("here")
         self.nonRigidElasRun(paramDict, elasParamDict)
 
     """

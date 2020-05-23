@@ -19,13 +19,21 @@
 # *=========================================================================
 
 import numpy as np
-import os,shutil
+import os, shutil, sys
 
-from ElastixHandler import* 
-from Param import* 
+from ElastixHandler import Elastix
+from Misc.Param import*
+__selfPath = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.dirname(__selfPath) + "/pyPCE")
+
+import pyPCE.pyPCE as pyPCE
+import pyPCE.SettingsFileIO as PceSettings
+
+
+from ItkHandler.itk_handler import *
 
 class PceHandler(Elastix):
-    __verbose=False
+    __verbose = False
     
     def __init__(self):
         super(PceHandler, self).__init__()
@@ -39,7 +47,7 @@ class PceHandler(Elastix):
         self.__removeSmallElements = "1"
         self.__smallElementThresh = "1e-13"
         self.__selfParams = {}
-        self.__clusterWaitFunc = lambda:True
+        self.__clusterWaitFunc = lambda :0
         self.__paramValTransFunc = lambda params:params
         self.__loadFrompreviousRun = False
     
@@ -51,36 +59,47 @@ class PceHandler(Elastix):
             on computation cluster.
     @return: NA.
     """        
-    def run(self,rigOnCluster = False, nonRigOnCluster = False):
+    def run(self, rigOnCluster = False, nonRigOnCluster = False):
         self.elastixOnCluster(rigOnCluster)
         self.runRig()
         self.generatePceParamFile()
-        self.generateWeightFile()
-        self.loadWeightFromFile()
+        pceSettings = PceSettings.LoadSettings(self["PCE_ModelSetRunFile"])
+        self.pce = pyPCE(pceSettings)
+        self.loadWeightFromFile(self.pce.GetModelInputSamplingScenarios())
         self.__clusterWaitFunc()
         self.elastixOnCluster(nonRigOnCluster)
         self.runAllNonRigidReg()
         self.clusterWait()
-        self.getStd()
+        self.CalculatePceCoefficients()
+        std = self.pce.GetModelOutputStd([])
+        itkHandler = itk_handler()
+        itkHandler.setImageVolumage(std.reshape(self.deformationFieldShape))
+        itkHandler.setImageSpacing(self.deformationFieldSpacing)
+        itkHandler.setImageOrigin(self.deformationFieldOrigin)
+        itkHandler.saveImage(self["RegMainDir"] + "/std.mhd", True)
     
     """
     @brief: Generates standard image after all parameters are settled.
     @return: NA.
     """   
-    def getStd(self):
+    def CalculatePceCoefficients(self):
         self["stdImageFile"] = self["RegMainDir"]+"/stdImage.mhd"
         for cnt in range(0, self.__sampleNum):
             self["defFieldDir"] = self["RegMainDir"] + "/NonRigid/Transformix" + str(cnt)
             self["nonRigRegDir"] = self["RegMainDir"] + "/NonRigid/Elastix" + str(cnt)
             self.getDeformationField()
-        cmd = self["prePceCommands"]
-        cmd += self["PCE_Exe"] + " -rootDir " + self["RegMainDir"] + " -verbose -uncertainty " + self["uncertaintyGroup"] \
-               + " -sobol " + "-polOrderFile " + " -outDir " + self["RegMainDir"] + " -settingsFile " + self["PCE_ModelSetRunFile"] + " -runPCE "
-        cmd += self["postPceCommands"]
-        os.system(cmd)
-        for cnt in range(0, self.__sampleNum):
-            self["defFieldDir"] = self["RegMainDir"] + "/NonRigid/Transformix" + str(cnt)
-            shutil.rmtree(self["defFieldDir"])
+            itkHandler = itk_handler()
+            itkHandler.loadImage(self["RegMainDir"] + "/NonRigid/Transformix" + str(cnt) + "/deformationField.mhd")
+            if cnt == 0:
+                defField = itkHandler.getImageVolume()
+                self.deformationFieldShape = defField.shape
+                self.deformationFieldOrigin = itkHandler.getImageOrigin()
+                self.deformationFieldSpacing = itkHandler.getImageSpacing()
+                defField = defField.reshape(-1)
+                self.deformationFieldSample = np.zeros([defField.shape[0], self.__sampleNum], dtype = "float")
+            self.deformationFieldSample[:, cnt] = itkHandler.getImageVolume().reshape(-1)
+        self.pce.SetModelOutput(self.deformationFieldSample)
+        self.pce.CalculatePceCoefficients()
 
     """
         @brief: Implements all non rigid registrations.
@@ -189,36 +208,9 @@ class PceHandler(Elastix):
                 ln += ","
             ln += "\"" + str(it) + "\""
         ln += "]\n}"
-        fl = open(self["PCE_ModelSetRunFile"],"w")
-        ln = fl.writelines(ln)
-        fl.close() 
-    
-    """
-    @brief: Used to generate instance settings file for PCE executable.
-    @return: NA.
-    """
-    def generatePceParamFileFromInstance(self):
-        fl = open(self["PceSetInstanceFile"], "r")
-        ln = fl.readlines()
-        fl.close()
-        for cnt in range(0, len(ln)):
-            if ln[cnt].count("quadrature_type") > 0:
-                ln[cnt] = "\"quadrature_type\" : ["
-                for ind, it in enumerate(self.__paramsToAnalyze):
-                    if not ind == 0:
-                        ln[cnt] += ","
-                    ln[cnt] += "\"gauss-" + self.__getPolType(it.getDist()) + "\""
-                ln[cnt] += "],\n"
-            if ln[cnt].count("std_devs") > 0:
-                ln[cnt] = "\"std_devs\" : ["
-                for ind, it in enumerate(self.__paramsToAnalyze):
-                    if not ind == 0:
-                        ln[cnt] += ","
-                    ln[cnt] += "\"" + str(it.getStd()) + "\""
-                ln[cnt] += "],\n"
         fl = open(self["PCE_ModelSetRunFile"], "w")
-        ln = fl.writelines(ln)
-        fl.close()            
+        fl.writelines(ln)
+        fl.close()
     
     """
     @brief: Used to generate weights file from PCE executable for registration sampling locations .
@@ -260,20 +252,14 @@ class PceHandler(Elastix):
             environment settings.
     @return: NA.
     """            
-    def loadWeightFromFile(self):
-        fl = open(self["Pce_WeightFile"], "r")
-        ln = fl.readlines()
-        fl.close()
-        self.setSampleNumber(int(ln[0]))
-        weights = []
-        for ind in range(0, self.__sampleNum):
-            weights += [ln[ind + 1].split(",")]
-        weights = list(map(list, zip(*weights)))
-        
+    def loadWeightFromFile(self, scenarios):
+        self.setSampleNumber(scenarios.shape[0])
+        if not scenarios.shape[1] == len(self.__paramsToAnalyze):
+            assert("Parameter number mismatch.")
         for ind, it in enumerate(self.__paramsToAnalyze):
             it.resetVal()
-            for ind2 in range(0, self.__sampleNum):
-                it.addVal(float(weights[ind][ind2]) + it.getMean())
+            for ind2 in range(0, scenarios.shape[0]):
+                it.addVal(float(scenarios[ind2, ind]) + it.getMean())
             it.mapVal()
             
     """

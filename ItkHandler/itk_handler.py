@@ -4,6 +4,8 @@ import SimpleITK as sitk
 
 class itk_handler(object):
 
+    def __init__(self):
+        self.__fullImage = [[],[],[]]
     def loadImage(self, imFile):
         try:
             self.__fullImage = self.loadItkImage(imFile)
