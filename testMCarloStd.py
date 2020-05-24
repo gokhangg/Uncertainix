@@ -19,98 +19,100 @@
 # *=========================================================================
 
 
-import sys,time,os
-import lib.Param as PR
-import lib.MonteCarlo as MC
-from DatasetsAndParameters import Dataset
+import sys, time, os
+import MonteCarloHandler.MonteCarlo as MC
+from temp.SynteticImages import Dataset
 
-if sys.version_info[0]==3:
+if sys.version_info[0] == 3:
     import subprocess
-    exeGetOutput=subprocess.getoutput
+    exeGetOutput = subprocess.getoutput
 else:
     import commands
-    exeGetOutput=commands.getoutput
+    exeGetOutput = commands.getoutput
 
-SelfPath=os.path.dirname(os.path.realpath(__file__))
+SelfPath = os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(0,"./lib")
-sys.path.insert(0,"../lib")
+sys.path.insert(0, "./Misc")
+sys.path.insert(0, "../Misc")
 
 """
 @brief: It just waits till end of all 
         jobs of the user.
 @Note:  Experiments were executed on the BIGR cluster facility and this 
         method is wait function for this cluster. Therefore, for a different
-        cluster this method should be revisiteda dn modified.
+        cluster this method should be revisited and modified.
 """
 def waitCluster():
-    Qstat=exeGetOutput("qstat ")
-    cnt=0
-    while Qstat.count("\n")>1:
-        Qstat=exeGetOutput("qstat ")
-        if not cnt==Qstat.count("\n"):
-            cnt=Qstat.count("\n")
-            print("Remaining Task ",cnt-1)
+    Qstat = exeGetOutput("qstat ")
+    cnt = 0
+    while Qstat.count("\n") > 1:
+        Qstat = exeGetOutput("qstat ")
+        if not cnt == Qstat.count("\n"):
+            cnt = Qstat.count("\n")
+            print("Remaining Task ", cnt - 1)
         time.sleep(2)  
 
 
 def setupEnvSimulatedData(el):
      #Root Dir where the results to be saved
-    el["RootDir"]=SelfPath
-    el["resultsRootDir"]=el["RootDir"]+"/ExpResults/MC"
+    el["RootDir"] = SelfPath
+    el["resultsRootDir"] = el["RootDir"] + "/temp/ExpResults/MC"
     #Rootdir where registration results to be saved
-    el["registRootDir"]=el["resultsRootDir"]
+    el["registRootDir"] = el["resultsRootDir"]
     #Path of Intra dataset
-    el["fixedDatasetPath"]=el["RootDir"]+"/TestImages"
+    el["fixedDatasetPath"] = el["RootDir"] + "/TestImages"
     #Path of Pre dataset
-    el["movingDatasetPath"]=el["RootDir"]+"/TestImages"
+    el["movingDatasetPath"] = el["RootDir"] + "/TestImages"
     #Path of segmentation dataset
-    el["segDatasetPath"]=el["RootDir"]+"/TestImages"
+    el["segDatasetPath"] = el["RootDir"] + "/TestImages"
 
     #Rigid registration parameter file template
-    el["rigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/RigidparaPI.txt"
+    el["rigidParaTemplate"] = el["RootDir"] + "/ParameterFiles/RigidparaPI.txt"
     #Nonrigid registration parameter file template
-    el["nonRigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/Nonrigidpara2ndStep.txt"
+    el["nonRigidParaTemplate"] = el["RootDir"] + "/ParameterFiles/Nonrigidpara2ndStep.txt"
     #Example settings for PCE execution model
-    el["PceSetInstanceFile"]=el["RootDir"]+"/ParameterFiles/PceParamInstance.json"
+    el["PceSetInstanceFile"] = el["RootDir"] + "/ParameterFiles/PceParamInstance.json"
     
     #Path of PCE executable
-    el["PCE_ExePath"]=SelfPath+"/MatlabScripts"
+    el["PCE_ExePath"] = SelfPath + "/MatlabScripts"
     #Name of the PCE executable
-    el["PCE_ExeName"]="pceExe"
+    el["PCE_ExeName"] = "pceExe"
     #PCE executable
-    el["PCE_Exe"]=el["PCE_ExePath"]+"/"+el["PCE_ExeName"]
+    el["PCE_Exe"] = el["PCE_ExePath"] + "/" + el["PCE_ExeName"]
     #Settings file for PCE execution model
-    el["PCE_ModelSetRunFile"]=el["PCE_ExePath"]+"/PCE_Settings.json"
+    el["PCE_ModelSetRunFile"] = el["PCE_ExePath"] + "/PCE_Settings.json"
     #Elastix executable 
-    el["elastixExe"]="/scratch/ggunay/Tools/elastix/src/bin/elastix"
+    el["elastixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/elastix"
     #Transformix executable
-    el["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
-    el["Pce_WeightFile"]=el["registRootDir"]+"/PceWeights.txt"
+    el["transformixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/transformix"
+    el["Pce_WeightFile"] = el["registRootDir"] + "/PceWeights.txt"
     
 def runSimulated():
-    mc=MC()
+    mc = MC()
     setupEnvSimulatedData(mc)
     
-    W=100
+    W = 100
     mc.isVerbose(True)
-    mc["RegMainDir"]=mc["registRootDir"]
+    mc["RegMainDir"] = mc["registRootDir"]
     
     """"[ParamName,ParamDist,Param,ParamMean,ParamStd]"""
     """For uniform distribution ParamMean is the lower, ParamStd is the higher dist. boundary"""
 
     Data = Dataset()
+
+    mc["rigidParaTemplate"] = Data.getRegistrationParameters()["RigidParamFile"]
+    mc["nonRigidParaTemplate"] = Data.getRegistrationParameters()["NonRigidParamFile"]
     
-    clusterProcessNumberUppperLimit=50
+    clusterProcessNumberUppperLimit = 50
     
-    mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
-    mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
-    mc.setWaitClusterFunc(waitCluster)
+    #mc.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
+    #mc.transformixSetClusterCommand("bigrsub -R 1.5G -q day ")
+    #mc.setWaitClusterFunc(waitCluster)
     for ind in range(0, Data.getDatasetNumber()):
         it = Data.getDatasetWithIndex(ind)
         mc["fixedIm"] = it["fixedIm"]
         mc["movingIm"] = it["movingIm"]
         mc.setParams(it["parameters"])
         mc["RegMainDir"] = mc["registRootDir"] + "/Dataset" + str(ind)
-        mc.run(W, clusterProcessNumberUppperLimit, False, True, False)
+        mc.run(W)
 runSimulated()

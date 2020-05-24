@@ -19,9 +19,9 @@
 # *=========================================================================
 
 import sys,time,os
-import lib.PceHandler as PCE
-import lib.MatlabExeCompiler as MatlabCompiler
-from DatasetsAndParameters import Dataset
+import PceHandler.PceHandler as PCE
+import Misc.MatlabExeCompiler as MatlabCompiler
+from temp.SynteticImages import Dataset
 
 if sys.version_info[0]==3:
     import subprocess
@@ -127,49 +127,22 @@ def setupEnvRealDataOld(el):
     el["movingIm"]=el["movingDatasetPath"]+"/Pre.mhd"
 
 def setupEnvSimulatedData(el):
-     #Root Dir where the results to be saved
-    el["RootDir"]=SelfPath
-    el["resultsRootDir"]=el["RootDir"]+"/ExpResults/PCE"
-    #Rootdir where registration results to be saved
-    el["registRootDir"]=el["resultsRootDir"]
-    #Path of Intra dataset
-    el["fixedDatasetPath"]=el["RootDir"]+"/TestImages"
-    #Path of Pre dataset
-    el["movingDatasetPath"]=el["RootDir"]+"/TestImages"
-    #Path of segmentation dataset
-    el["segDatasetPath"]=el["RootDir"]+"/TestImages"
+    # Root Dir where the results to be saved
+    el["RootDir"] = SelfPath
+    el["resultsRootDir"] = el["RootDir"] + "/temp/ExpResults/PCE"
+    # Rootdir where registration results to be saved
+    el["registRootDir"] = el["resultsRootDir"]
 
-    #Rigid registration parameter file template
-    el["rigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/RigidparaPI.txt"
-    #Nonrigid registration parameter file template
-    el["nonRigidParaTemplate"]=el["RootDir"]+"/ParameterFiles/Nonrigidpara2ndStep.txt"
-    #Example settings for PCE execution model
-    el["PceSetInstanceFile"]=el["RootDir"]+"/ParameterFiles/PceParamInstance.json"
-    
-    #Path of PCE executable
-    el["PCE_ExePath"]=SelfPath+"/MatlabScripts"
-    #Name of the PCE executable
-    el["PCE_ExeName"]="pceExe"
-    #PCE executable
-    el["PCE_Exe"]=el["PCE_ExePath"]+"/"+el["PCE_ExeName"]
-    #Settings file for PCE execution model
-    el["PCE_ModelSetRunFile"]=el["PCE_ExePath"]+"/PCE_Settings.json"
-    #Elastix executable 
-    el["elastixExe"]="/scratch/ggunay/Tools/elastix/src/bin/elastix"
-    #Transformix executable
-    el["transformixExe"]="/scratch/ggunay/Tools/elastix/src/bin/transformix"
-    el["Pce_WeightFile"]=el["registRootDir"]+"/PceWeights.txt"
+    # Settings file for PCE execution model
+    el["PCE_ModelSetRunFile"] = el["resultsRootDir"] + "/PCE_Settings.json"
+    # Elastix executable
+    el["elastixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/elastix"
+    # Transformix executable
+    el["transformixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/transformix"
 
 def runSimulated():
-    
-    compiler=MatlabCompiler()
-    compiler["preCommands"]="module load matlab & module load mcr &"
-    compiler["postCommands"]=""
-    compiler.compileMatlabExe()
-    
-    pce=PCE()
-    pce["prePceCommands"]="module load matlab & module load mcr &"
-    pce["postPceCommands"]=""
+
+    pce = PCE.PceHandler()
     setupEnvSimulatedData(pce)
     pce.isVerbose(True)
     
@@ -182,8 +155,8 @@ def runSimulated():
     pce.setRemoveSmallElements("1")
     pce.setSmallElementThresh("1e-13")    
     
-    pce.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
-    pce.setClusterWaitFunc(waitCluster)
+    #pce.elastixSetClusterCommand("bigrsub -R 1.5G -q day ")
+    #pce.setClusterWaitFunc(waitCluster)
     
     """
     Format: {"Image Name in the dataset table":{"name":Real image name,"file":Image file name with full path}}
@@ -191,11 +164,13 @@ def runSimulated():
     """
 
     Data = Dataset()
+    pce["rigidParaTemplate"] = Data.getRegistrationParameters()["RigidParamFile"]
+    pce["nonRigidParaTemplate"] = Data.getRegistrationParameters()["NonRigidParamFile"]
     """
     Here we assert which uncertainies will be produced using Sobol decomposition.
     """
     pce["uncertaintyGroup"] = "1-2-1_2-all"
-    for ind in range(0, Data.getDatasetNumber()):
+    for ind in range(0, 1):
         it = Data.getDatasetWithIndex(ind)
         for ind2 in [3]:
             for ind3 in [3]:
@@ -206,7 +181,7 @@ def runSimulated():
                 pce["movingIm"] = it["movingIm"]
                 pce.setParams(it["parameters"])
                 
-                pce["RegMainDir"]=pce["registRootDir"]+"/Dataset"+str(ind)+"/""Gl"+str(ind2)+"Po"+str(ind3)
+                pce["RegMainDir"] = pce["registRootDir"] + "/Dataset" + str(ind) + "/""Gl" + str(ind2) + "Po" + str(ind3)
                 pce.run(False, True)
 
 runSimulated()
