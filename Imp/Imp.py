@@ -1,6 +1,6 @@
 
 
-from Mode.Create import CreateMode
+from Mode import Create as CreateMode
 from Method.Create.Create import CreateMethod
 import Environment.EnvSetup.Environment as Environment
 import ItkHandler.itk_handler.itk_handler as ItkHandler
@@ -16,6 +16,7 @@ class Implementation():
     def __init__(self):
         self.__itkHandler = ItkHandler()
         self.__env = Environment()
+        self.__sampleSize = 100
     
     def SelectMode(self, mode):
         if mode == "MonteCarlo":
@@ -39,9 +40,9 @@ class Implementation():
             
     def Run(self, datasetIndex = 0):
         paramSettings = self.__dataset.GetParams()
-        paramSettings.update({"SampleSize":self.__sampleSize})
-        self.__mode.SetStatSettings(paramSetting)
-        sampleSize = self.__mode.GetSampleSize()
+        
+        self.__mode.SetStatSettings(paramSettings)
+        self.__mode.SetSampleSize(self.__sampleSize)
         paramVals = self.__mode.GetSampleVals()
         
         dataset = self.__dataset.GetDatasetWithIndex(datasetIndex)
@@ -50,16 +51,14 @@ class Implementation():
         self.__method.SetEnvironment(self.__env)
         self.__method.SetParamVals(paramVals)
         
+        self.__method.Run()
+        while not self.__method.IsFinished():
+            time.sleep(25)
+        
         resultFunct = self.__method.GetResultWithIndex
         self.__mode.SetMethodOutput(resultFunct)
         
-        self.__method.Run()
-        
-        while not self.__method.IsFinished():
-            time.sleep(25)
-    
         self.__mode.Run()
-        self.__result = self.__mode.GetResult()
         
     def GetResult(self):
-        return self.__result
+        return self.__mode.GetResult()

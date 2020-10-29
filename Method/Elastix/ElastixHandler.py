@@ -18,7 +18,7 @@
 # *  the License.
 # *=========================================================================
 
-from Method.MethodB import MethodB
+from Method.MethodB import MethodB as Base
 
 import re, shutil, os
 import sys
@@ -31,7 +31,7 @@ else:
     exeGetOutput = commands.getoutput
     
 
-class ElastixParamC(obj):
+class ElastixParamC(Base):
     
     def __init__(self, file, verbose = False):
         self.__file = file
@@ -49,8 +49,7 @@ class ElastixParamC(obj):
         assert Res1[0] == 1, ("Maldefinition of the parameter")
         self.__ReplaceLine(self.__file, Res1[1][0][0], "(" + param + " " + str(value) + ")\n")
         if self.__verbose:
-                print("Maldefinition of the parameter")
-        return 0
+            print("Maldefinition of the parameter")
             
     """
         @brief: Finds a keyword(s) in a text file, this function is intended

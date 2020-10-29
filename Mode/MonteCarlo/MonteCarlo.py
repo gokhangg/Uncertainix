@@ -30,17 +30,11 @@ class MonteCarlo(ModeB):
         self.__distribution = settings["Distribution"]
         self.__sampleValues = self.__GetSampleVals()
     
-    def GetSampleSize(self):
-        return self.__sampleSize
-    
     def SetSampleSize(self, sz):
         self.__sampleSize = sz
     
     def GetSampleVals(self):
         return self.__sampleValues
-    
-    def SetSampleVals(self, paramVals):
-        self.__sampleValues = paramVals
     
     def SetMethodOutput(self, MethodOutputObj):
         self.__methodOutputObj = MethodOutputObj
@@ -52,7 +46,7 @@ class MonteCarlo(ModeB):
         self.__result = self.__GetStdVect()
     
     @staticmethod
-    def GetSampleSettings():
+    def __GetSampleSettings():
         settings = {}
         settings["SampleSize"] = 100
         settings["Sigma"] = [1., 2., 3.]

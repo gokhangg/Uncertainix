@@ -15,19 +15,11 @@ class ModeB(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def GetSampleSize(self):
-        pass
-    
-    @abc.abstractmethod
-    def SetSampleSize(self):
+    def SetSampleSize(self, size):
         pass
     
     @abc.abstractmethod
     def GetSampleVals(self):
-        pass
-    
-    @abc.abstractmethod
-    def SetSampleVals(self):
         pass
     
     @abc.abstractmethod

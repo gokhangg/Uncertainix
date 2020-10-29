@@ -21,19 +21,37 @@
 import numpy as np
 import os, shutil, sys
 
-from ElastixHandler import Elastix
-from Misc.Param import*
-__selfPath = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.dirname(__selfPath) + "/pyPCE")
+from ModeB import ModeB 
 
 import pyPCE.pyPCE as pyPCE
 import pyPCE.SettingsFileIO as PceSettings
 
 
-from ItkHandler.itk_handler import *
+class PceHandler(ModeB):
+    
+    
+    def SetStatSettings(self):
+        pass
+    
 
-class PceHandler(Elastix):
-    __verbose = False
+    def SetSampleSize(self, size):
+        pass
+    
+
+    def GetSampleVals(self):
+        pass
+    
+
+    def SetMethodOutput(self):
+        pass
+    
+
+    def GetResult(self):
+        pass
+    
+
+    def Run(self):
+        pass
     
     def __init__(self):
         super(PceHandler, self).__init__()
