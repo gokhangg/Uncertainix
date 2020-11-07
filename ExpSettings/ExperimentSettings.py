@@ -1,13 +1,12 @@
 
 
-import DatasetAndParameters.CreateDataset as CreateDataset
-import DatasetAndParameters.ParameterSettings as CreateParameterSettings
+import ExSettings.ParameterSettings as CreateParameterSettings
 from Environment import Environment
 
 class ExperimentSettings():
     
-    def __init__(self, datasetType):
-        self.__dataset = CreateDataset(datasetType)
+    def __init__(self, dataset):
+        self.__dataset = dataset
         parameters = self.__dataset.GetMethodParameters()["MethodParameters"]
         self.__parameterSettings = CreateParameterSettings(parameters)
         self.__environment = Environment()
@@ -18,23 +17,8 @@ class ExperimentSettings():
     def GetParameterSettings(self, datasetIndex):
         return self.__parameterSettings(datasetIndex)
     
-    def GetNonrigCount(self, datasetIndex):
+    def GetMethodParameters(self, datasetIndex):
         return self.__parameterSettings.GetParamValueSize()
-    
-    def GetRigidElastixSettings(self, datasetIndex):
-        return self.__dataset.GetRigidElastixDict()
-    
-    def GetRigidTransformixSettings(self, datasetIndex):
-        return self.__dataset.GetNonrigidElastixDict()
-    
-    def GetNonrigidElastixSettings(self, datasetIndex):
-        return self.__dataset.GetRigidTransformixDict()
-    
-    def GetNonrigidTransformixSettings(self, datasetIndex):
-        return self.__dataset.GetNonrigidTransformixDict()
-    
-    def GetEnvironment(self):
-        return self.__environment
     
     def SetParameterSettings(self, parameterSettings):
         self.__parameterSettings = parameterSettings

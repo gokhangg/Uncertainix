@@ -19,8 +19,8 @@
 # *=========================================================================
 
 import os
-from ParameterSettings.Parameter import Parameter as Par
-from Dataset.DatasetBase import DatasetBase
+from ExpSettings.Parameter import Parameter as Par
+from ExpSettings.DatasetBase import DatasetBase
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
