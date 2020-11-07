@@ -4,14 +4,15 @@ Created on Wed Oct 28 19:19:07 2020
 
 @author: ghngu
 """
-from Realimages import Dataset as RealDataset
-from Synteticimages import Dataset as SynDataset
-from Dataset import DatasetBase as Base
+from RealImages.Dataset import Dataset as RealDataset
+from SynteticImages.Dataset import Dataset as SynDataset
+import Dataset.DatasetBase as Base
 
-    
-def CreateReal() -> Base:
-    return RealDataset()
 
-def CreateSynthetic() -> Base:
-    return SynDataset()
+
+def CreateDataset(datasetType) -> Base:
+    if datasetType == "Real":
+        return RealDataset()
+    if datasetType == "Synthetic":
+        return SynDataset()
  

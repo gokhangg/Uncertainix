@@ -23,8 +23,7 @@ import os, shutil, sys
 
 from ModeB import ModeB 
 
-import pyPCE.pyPCE as pyPCE
-import pyPCE.SettingsFileIO as PceSettings
+from pyPCE.pyPCE.pyPCE import pyPCE as PceSettings
 
 
 class PceHandler(ModeB):

@@ -11,19 +11,7 @@ import abc
 class MethodB(abc.ABC):
     
     @abc.abstractmethod
-    def SetParamSettings(self):
-        pass
-    
-    @abc.abstractmethod
-    def SetDataset(self):
-        pass
-    
-    @abc.abstractmethod
-    def SetParamVals(self):
-        pass
-    
-    @abc.abstractmethod
-    def SetEnvironment(self):
+    def SetExperimentSettings(self):
         pass
     
     @abc.abstractmethod

@@ -2,44 +2,44 @@ import numpy as np
 import SimpleITK as sitk
 
 
-class itk_handler(object):
+class ItkHandler(object):
 
     def __init__(self):
         self.__fullImage = [[],[],[]]
-    def loadImage(self, imFile):
+    def LoadImage(self, imFile):
         try:
             self.__fullImage = self.loadItkImage(imFile)
         except:
             print("Error in loading image\n")
 
-    def saveImage(self, imFile, isVector = False):
+    def SaveImage(self, imFile, isVector = False):
         try:
             self.saveItkImage(imFile, self.__fullImage, isVector)
         except:
             print("Error in saving image\n")
 
-    def getImageVolume(self):
+    def GetImageVolume(self):
         return self.__fullImage[0]
 
-    def getImageOrigin(self):
+    def GetImageOrigin(self):
         return self.__fullImage[1]
 
-    def getImageSpacing(self):
+    def GetImageSpacing(self):
         return self.__fullImage[2]
 
-    def getFullImage(self):
+    def GetFullImage(self):
         return self.__fullImage
 
-    def setImageVolumage(self, vol):
+    def SetImageVolumage(self, vol):
         self.__fullImage[0] = vol
 
-    def setImageOrigin(self, org):
+    def SetImageOrigin(self, org):
         self.__fullImage[1] = org
 
-    def setImageSpacing(self, sp):
+    def SetImageSpacing(self, sp):
         self.__fullImage[2] = sp
 
-    def setFullImage(self, fullImage):
+    def SetFullImage(self, fullImage):
         self.__fullImage = fullImage
 
     """
@@ -51,7 +51,7 @@ class itk_handler(object):
      @return: NA.
      """
     @staticmethod
-    def saveItkImage(fileName, itkImage, isVector=False) :
+    def SaveItkImage(fileName, itkImage, isVector=False) :
         sitk_img = sitk.GetImageFromArray(itkImage[0], isVector)
         sitk_img.SetOrigin(np.array(list(reversed(itkImage[1]))))
         sitk_img.SetSpacing(np.array(list(reversed(itkImage[2]))))
@@ -63,7 +63,7 @@ class itk_handler(object):
     @return: ItkImage contains image array and spatial coordinate details.
     """
     @staticmethod
-    def loadItkImage(filename):
+    def LoadItkImage(filename):
         itkimage = sitk.ReadImage(filename)
         vol = sitk.GetArrayFromImage(itkimage)
         origin = np.array(list(reversed(itkimage.GetOrigin())))

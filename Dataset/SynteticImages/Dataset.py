@@ -18,25 +18,14 @@
 # *  the License.
 # *=========================================================================
 
-import os, sys
-import Misc.Param as Par
+import os
+from ParameterSettings.Parameter import Parameter as Par
+from Dataset.DatasetBase import DatasetBase
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(0, "./Misc")
-sys.path.insert(0, "../Misc")
 
-class zipIterator:
-    def __init__(self, val):
-        self.__val = val
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.__val
-
-def getParameters():
+def GetParameters():
     """Simulated Dataset"""
     par = []
     """Simulated Dataset"""
@@ -45,8 +34,6 @@ def getParameters():
     """Simulated Dataset"""
     par2 = Par("FinalGridSpacingInPhysicalUnits", "gauss", 4.37, 0.55)
 
-    par1.setValMapFunct(lambda a: pow(2, a))
-    par2.setValMapFunct(lambda a: pow(2, a))
     par.append(par1)
     par.append(par2)
     return par
@@ -55,81 +42,51 @@ def getParameters():
 @brief:  Used to generate weights file from PCE executable for registration sampling locations .
 @return:  NA.
 """   
-def getFixedImages():
-    return [__selfPath + "/ImFlatN.mhd" for ind in range(0, 30)]
 
-def getFixedImageSegmentations():
-    return [__selfPath + "/ImFlat.mhd" for ind in range(0, 30)]
+__DATASET_SIZE = 30
 
-def getMovingImages():
-    return [__selfPath + "/Im" + str(ind) + "N.mhd" for ind in range(0, 30)]
+def GetFixedImage(ind: int):
+    return __selfPath + "/ImFlatN.mhd"
 
-def getMovingImageSegmentations():
-    return [__selfPath + "/Im" + str(ind) + ".mhd" for ind in range(0, 30)]
+def GetFixedImageSegmentation(ind: int):
+    return __selfPath + "/ImFlat.mhd"
 
-def getRegistrationParameters():
+def GetMovingImage(ind: int):
+    return __selfPath + "/Im" + str(ind) + "N.mhd"
+
+def GetMovingImageSegmentation(ind: int):
+    return __selfPath + "/Im" + str(ind) + ".mhd"
+
+def GetRegistrationParamFiles():
     retVal = {}
-    print("jkeerer", __selfPath)
     retVal.update({"RigidParamFile": __selfPath + "/RegistrationParameterFiles/RigidparaPI.txt"})
     retVal.update({"NonRigidParamFile": __selfPath + "/RegistrationParameterFiles/NonrigidparaPI.txt"})
     return retVal
 
-class Dataset(object):
+def GetDataset(ind: int):
+    retVal = {}
+    retVal.update({"fixedIm": GetFixedImage(ind)})
+    retVal.update({"movingIm": GetMovingImage(ind)})
+    retVal.update({"fixedSeg": GetFixedImageSegmentation(ind)})
+    retVal.update({"movingSeg": GetMovingImageSegmentation(ind)})
+    return retVal
+
+def GetElastixParameters():
+    paramDict = {"MethodParameters": GetParameters()}
+    paramDict.update({"MethodFiles": GetRegistrationParamFiles()})
+    return paramDict
+
+class Dataset(DatasetBase):
     def __init__(self):
-        self.__parameters = getParameters()
-        self.__fixedImages = getFixedImages()
-        self.__movingImages = getMovingImages()
-        self.__fixedImageSegmentations = getFixedImageSegmentations()
-        self.__movingImageSegmentations = getMovingImageSegmentations()
-        self.__dictionary = {}
-        self.__iterationCount = 0
-        if not len(self.__fixedImages) == len(self.__movingImages) == len(self.__fixedImageSegmentations) == len(self.__movingImageSegmentations):
-            message = "Numbers of fixed, moving and their segmentations are not compatible."
-            print(message)
-            return message
+        self.__methodParameters = GetElastixParameters()  
 
-        self.bindDataSetsToParams()
+    def GetDatasetSize(self):
+        return __DATASET_SIZE
 
-    def getDatasetNumber(self):
-        return len(self.__fixedImages)
-
-    def getDatasetWithIndex(self, ind):
-        return self["DataSet"+str(ind)]
-
-    def resetIterator(self):
-        self.__iterationCount = 0
-
-    def getRegistrationParameters(self):
-        return getRegistrationParameters()
-
-    def __getitem__(self, key):
-      	try:
-            return self.__dictionary[key]
-        except:
-            return ""
-
-    def __setitem__(self, key, value):
-        return self.__dictionary.update({key: value})
-
-    def __iter__(self):
-        return 5#self
-
-    def __next__(self):
-        if self.__iterationCount == len(self.__dictionary):
-            return StopIteration
-        else:
-            self.__iterationCount += 1
-            return 5#self["DataSet"+str(self.__iterationCount-1)]
-
-
-    """
-    @brief:  Some parameters to be analyze require extra information for the registration process.
-            Such as "point to surface penalty" requries moving image distance transform or segmentation and fixed image point
-            set. This function is used to add up those information to the parameters.
-    @return:  NA.
-    """
-    def bindDataSetsToParams(self):
-        for ind, [fixIm, movIm, fixSeg, movSeg] in enumerate(zip(self.__fixedImages, self.__movingImages, self.__fixedImageSegmentations, self.__movingImageSegmentations)):
-            self["DataSet"+str(ind)] = {"fixedIm": fixIm, "movingIm": movIm, "fixedSeg": fixSeg, "movingSeg": movSeg, "parameters": self.__parameters}
+    def GetDatasetWithIndex(self, ind:int):
+        return GetDataset(ind)
+    
+    def GetMethodParameters(self, ind:int):
+        return self.__methodParameters
 
 

@@ -18,12 +18,14 @@
 # *  the License.
 # *=========================================================================
 
-import os, sys
-import Misc.Param as Par
+import os
+from ParameterSettings.Parameter import Parameter as Par
+from Dataset.DatasetBase import DatasetBase
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
 __datasetRoot = "/hdd2/DataSet/FromLuu/DataSetJournalPaper"
+__pointsetDir = ""
 
 """Training Dataset"""
 __datasets = {"Dataset0":{"Patient":"Patient1", "Intra":"Intra01"}}
@@ -55,20 +57,6 @@ __datasets.update({"Dataset12":{"Patient":"Patient9", "Intra":"Intra02"}})
 #__datasets.update({"Dataset17":{"Patient":"Patient23", "Intra":"Intra01"}})
 
 
-
-
-
-
-class zipIterator:
-    def __init__(self, val):
-        self.__val = val
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        return self.__val
-
 def getPatientExtension(__dict, __key):
     return __dict[__key]["Patient"]
 
@@ -87,88 +75,69 @@ def getMovingImPath(__dict, __key):
 def getMovingImSegPath(__dict, __key):
     return __datasetRoot + "/SegmentationsFixed/" + getPatientExtension(__dict, __key) + "/Pre.mhd"
 
+def getFixedImDtPath(__dict, __key):
+    return __datasetRoot + "/SegmentationsFixed/" + getPatientExtension(__dict, __key) + "/Pre_dtout.mhd"
+
 def getFullDatasetInfo(__dict, __key):
-    return {"key":__key, "val":__dict[__key], "fixedIm": getFixedImPath(__dict, __key), "movingIm": getMovingImPath(__dict, __key),
-            "fixedSeg": getFixedImSegPath(__dict, __key), "movingSeg": getMovingImSegPath(__dict, __key)}
+    retVal = {"key":__key, "val":__dict[__key]}
+    retVal.update({"fixedIm": getFixedImPath(__dict, __key)})
+    retVal.update({"movingIm": getMovingImPath(__dict, __key)})
+    retVal.update({"fixedSeg": getFixedImSegPath(__dict, __key)})
+    retVal.update({"movingSeg": getMovingImSegPath(__dict, __key)})
+    retVal.update({"fixedSegDt": getFixedImDtPath(__dict, __key)})
+    retVal.update({"pointSet":__selfPath + "/PointSets_MI/" + getPatientExtension(__dict, __key) + getIntraExtension(__dict, __key) + ".txt"})
+    return retVal
 
 def getAllDatasets():
-    alla = [getFullDatasetInfo(__datasets, __key) for __key in __datasets]
-    return alla
+    return [getFullDatasetInfo(__datasets, __key) for __key in __datasets]
 
-def getParameters(args = {}):
+def GetParameters():
     """Real Dataset"""
     par = []
     """Real Dataset"""
     par1 = Par("Metric1Weight", "gauss", 3.3, 2.8)
     """Real Dataset"""
     par2 = Par("Metric2Weight", "gauss", -8.0, 1.2)
-    par2["registrationParams"] = {"-dt": __datasetRoot + "/SegmentationsFixed/" + str(args["val"]["Patient"]) + "/Pre_dtout.mhd",
-                                  "-fp": __selfPath + "/PointSets_MI/" + str(args["val"]["Patient"]) + str(args["val"]["Intra"]) + ".txt"}
     """Real Dataset"""
     par3 = Par("FinalGridSpacingInPhysicalUnits", "gauss", 6.0, 0.5)
 
-    par1.setValMapFunct(lambda a: pow(2, a))
-    par2.setValMapFunct(lambda a: pow(2, a))
-    par3.setValMapFunct(lambda a: pow(2, a))
     par.append(par1)
     par.append(par2)
     par.append(par3)
     return par
 
-def getRegistrationParameters():
+def GetRegistrationParamFiles():
     retVal = {}
     retVal.update({"RigidParamFile": __selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"})
     retVal.update({"NonRigidParamFile": __selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"})
     return retVal
 
-class Dataset(object):
+def GetElastixParameters():
+    paramDict = {"MethodParameters": GetParameters()}
+    paramDict.update({"MethodParameterExtension": {"ELastixParameterFiles": GetRegistrationParamFiles()} })
+    return paramDict
+    
+    
+
+class Dataset(DatasetBase):
     def __init__(self):
-        self.__dictionary = {}
-        self.__iterationCount = 0
-        self.bindDataSetsToParams()
+        self.__dataset = getAllDatasets()
+        self.__methodParameters = GetElastixParameters()        
 
-    def getDatasetNumber(self):
-        return len(self.__fixedImages)
-
-    def getDatasetWithIndex(self, ind):
-        return self["Dataset"+str(ind)]
-
-    def resetIterator(self):
-        self.__iterationCount = 0
-
-    def getRegistrationParameters(self):
-        return getRegistrationParameters()
-
-    def __getitem__(self, key):
-      	try:
-            return self.__dictionary[key]
-      	except:
-            return ""
-
-    def __setitem__(self, key, value):
-        return self.__dictionary.update({key: value})
-
-    def __iter__(self):
-        return 5#self
-
-    def __next__(self):
-        if self.__iterationCount == len(self.__dictionary):
-            return StopIteration
-        else:
-            self.__iterationCount += 1
-            return 5#self["DataSet"+str(self.__iterationCount-1)]
+    def GetDatasetSize(self):
+        return len(self.__dataset)
+    
+    def GetDatasetWithIndex(self, ind):
+        return self.__dataset[ind]
+    
+    def GetMethodParameters(self, ind):
+        paramDict = self.__methodParameters
+        extensionDict = {"-dt": self.__dataset[ind]["fixedSegDt"]}
+        extensionDict.update({"-fp": self.__dataset[ind]["pointSet"]})
+        
+        paramDict.update({"MethodParameterExtension": {"CommandlineParameters": GetRegistrationParamFiles()} })
+        return paramDict
 
 
-    """
-    @brief:  Some parameters to be analyze require extra information for the registration process.
-            Such as "point to surface penalty" requries moving image distance transform or segmentation and fixed image point
-            set. This function is used to add up those information to the parameters.
-    @return:  NA.
-    """
-    def bindDataSetsToParams(self):
-        for ind, it in enumerate(getAllDatasets()):
-            
-            it.update({"parameters": getParameters(it)})
-            self[it["key"]] = it.copy()
 
 

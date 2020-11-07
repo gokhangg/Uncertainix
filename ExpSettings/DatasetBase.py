@@ -7,20 +7,16 @@ Created on Wed Oct 28 19:16:33 2020
 
 import abc
 
-class DataSetBase(abc.ABC):
+class DatasetBase(abc.ABC):
     
     @abc.abstractmethod
-    def __init__(self):
+    def GetDatasetSize(self):
         pass
     
     @abc.abstractmethod
-    def GetParams(self):
+    def GetDatasetWithIndex(self, ind:int):
         pass
     
     @abc.abstractmethod
-    def GetDataSetNum(self):
-        pass
-    
-    @abc.abstractmethod
-    def GetDatasetWithInd(self, ind):
+    def GetMethodParameters(self, ind:int):
         pass

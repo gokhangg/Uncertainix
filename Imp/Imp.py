@@ -1,11 +1,10 @@
 
 
 from Mode import Create as CreateMode
-from Method.Create.Create import CreateMethod
-import Environment.EnvSetup.Environment as Environment
+from Method import Create as CreateMethod
+from Method.Environment.EnvSetup import Environment as Environment
 import ItkHandler.itk_handler.itk_handler as ItkHandler
-import Dataset.RealImages.Dataset as RealDataset
-import Dataset.SynteticImages.Dataset as SimDataset
+from Dataset import Create as CreateDataset
 
 import time
 
@@ -31,9 +30,9 @@ class Implementation():
             
     def SelectDataset(self, dataset):
         if dataset == "RealDataset":
-            self.__dataset = RealDataset()
+            self.__dataset = CreateDataset.RealDataset()
         elif dataset == "SimulatedDataset":
-            self.__dataset = SimDataset()
+            self.__dataset = CreateDataset.Synthetic()
             
     def SetSampleSize(self, size):
         self.__sampleSize = size

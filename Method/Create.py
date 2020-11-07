@@ -7,7 +7,7 @@ Created on Tue Sep 22 19:24:50 2020
 
 
 from Method.MethodB import MethodB as Base
-import Elastix.Elastix as Elastix
+import Elastix as Elastix
 
 
 def CreateElastix() -> Base:
