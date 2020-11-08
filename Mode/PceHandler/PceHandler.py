@@ -19,7 +19,7 @@
 # *=========================================================================
 
 import numpy as np
-import os, shutil, sys
+import os
 
 from ModeB import ModeB 
 
@@ -53,7 +53,6 @@ class PceHandler(ModeB):
         pass
     
     def __init__(self):
-        super(PceHandler, self).__init__()
         self.__sampleNum = 10
         self.__paramsToAnalyze = []
         self.__polOrd = 1

@@ -39,6 +39,8 @@ class Parameter(object):
         self.__highBnd = high
         self.__valType = valType
         self.__vals = []
+        self.__MapFunct = lambda a:a
+        
         
     def GetName(self):
         return self.__name
@@ -48,17 +50,22 @@ class Parameter(object):
     
     def GetStatistics(self):
         retDict = {}
-        retDict.update({"Distribution":self.__dist})
-        retDict.update({"Std":str(self.__std)})
-        retDict.update({"Mean":str(self.__mean)})
-        retDict.update({"LowBoundary":str(self.__lowBnd)})
-        retDict.update({"HighBoundary":str(self.__highBnd)})
+        retDict.update({"distribution":self.__dist})
+        retDict.update({"std":self.__std})
+        retDict.update({"mean":self.__mean})
+        retDict.update({"lowBoundary":self.__lowBnd})
+        retDict.update({"highBoundary":self.__highBnd})
         return retDict
     
-    def SetValues(self, values):
-        self.__vals = values
+    def SetRawValues(self, values):
+        self.__vals = []
+        for it in values:
+            self.__vals.append( self.__MapFunct(float(it)) )
         
     def GetValType(self):
         return self.__valType
+    
+    def SetMapFunct(self, Funct):
+        self.__MapFunct = Funct
     
     

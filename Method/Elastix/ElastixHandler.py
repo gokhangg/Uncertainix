@@ -90,12 +90,12 @@ class Elastix(Base):
     def __init__(self):
         pass
     
-    def SetExperSettings(self, settings):
-        self.__experimentSettings = settings
+    def SetMethodSettings(self, settings):
+        self.__settings = settings
         
-        self.__environment = settings.GetEnvironment()
-        if "WaitFunction" in self.__environment:
-            self.__WaitFunction = self.__environment["WaitFunction"] 
+        envDict = self.__settings["extension"]["environment"].GetEnvironmentDict()
+        if "WaitFunction" in envDict:
+            self.__WaitFunction = envDict["WaitFunction"] 
         
     def Run(self, datasetIndex, abortRigidIfExist = False):
         self.__finished = False
@@ -103,29 +103,30 @@ class Elastix(Base):
         self.__UpdateEnvironmentDict(datasetIndex)
         
         """Run Rigid registration first to init the registrations"""
+        self.__CreateDir(self.__envDict["rigidRegDir"])
         self.__RunRigidElas(abortRigidIfExist)
         self.__WaitFunction()
         
         """Since each nonrigid registration is done as per the parameter values,
            we take parameter value gorups as index.         
         """
-        expSize = self.__experimentSettings.GetNonrigCount(datasetIndex)
+        parameters = self.__settings["parameters"]
+        expSize = len(parameters[0].GetValues())
         for expInd in range(expSize):
-            expDir = self.__envDict["NonrigRegDirs"][expInd]
+            expDir = self.__envDict["nonrigidRegDirs"][expInd]
             self.__CreateDir(expDir)
             nonrigidParamFile = self.__CreateNonRigidParamFile(expInd)
             
             """Non rigid parameter file is generated in its folder.
                We are changing the paremeter values used in the experiment. 
             """
-            paramValues = self.__paramSettings.GetParamVals()[expInd]
             paramFile = ElastixParamFileModifier(nonrigidParamFile)
             """We are changing values in the parameter file as per parameters."""
-            for ind, param in enumerate(self.__paramsAndVals.GetParamNames()):
-                paramFile.ChangeParameterValue(self, param, paramValues[ind])
+            for param in parameters:
+                paramFile.ChangeParameterValue(param.GetName(), param.GetValues()[expInd])
             
             """The last point is to run the nonrigid registration"""
-            self.__RunNonrigidElas(datasetIndex, expInd)
+            self.__RunNonrigidElas(datasetIndex, expInd, nonrigidParamFile)
         """All non rigid registrations perhaps are need to be finished
            So waiting here if the wait functio is set.
         """   
@@ -139,39 +140,51 @@ class Elastix(Base):
         pass
     
     def __UpdateEnvironmentDict(self, datasetIndex):
-        exprRoot = self.__environment["ExperimentsRootDir"]
-        expSize = self.__experimentSettings.GetExperimentSize()
+        environment = self.__settings["extension"]["environment"]
+        
+        exprRoot = environment["experimentsRootDir"]
+        expSize = len(self.__settings["parameters"][0].GetValues())
         
         envDict = {}
-        envDict.update({"ElastixExe":self.__environment["ElastixExe"]})
-        envDict.update({"TransformixExe":self.__environment["TransformixExe"]})
-        envDict.update({"RigidRegDir":exprRoot + "/Dataset{0:d}/Rig".format(datasetIndex)})
+        envDict.update({"elastixExe":environment["elastixExe"]})
+        envDict.update({"transformixExe":environment["transformixExe"]})
+        envDict.update({"rigidRegDir":exprRoot + "/Dataset{0:d}/Rig".format(datasetIndex)})
         
         nonrigDirs = [exprRoot + "/Dataset{0:d}/Nonrig/Elas{1:d}".format(datasetIndex, ind) for ind in range(expSize)]
-        envDict.update({"NonrigidRegDirs":nonrigDirs})
+        envDict.update({"nonrigidRegDirs":nonrigDirs})
         transDirs = [exprRoot + "/Dataset{0:d}/Nonrig/Trans{1:d}".format(datasetIndex, ind) for ind in range(expSize)]
-        envDict.update({"TransDirs":transDirs})
+        envDict.update({"transDirs":transDirs})
         
-        envDict.update({"RigidParameterFile": self.__environment["RigidParameterFile"]})
-        envDict.update({"NonrigidParameterFile": self.__environment["NonrigidParameterFile"]})
+        parameterFiles = self.__settings["extension"]["parameterFiles"]
+        envDict.update({"rigidParameterFile":  parameterFiles["rigidParameterFile"]})
+        envDict.update({"nonrigidParameterFile":  parameterFiles["nonrigidParameterFile"]})
         self.__envDict = envDict
        
     
     def __RunRigidElas(self, datasetIndex, abortIfExist = False):
         if abortIfExist and os.path.exists(self.__environment["rigOutDir"] + "/TransformParameters.0.txt"):
             return
-        elasDict = self.__experimentSettings.GetRigidElastixSettings(datasetIndex)
-        elasDict.update({"-p":self.__envDict["RigidParameterFile"]})
-        elasDict.update({"-out":self.__envDict["RigRegDir"]})
-        self.__RunElasTrans(self.__envDict["ElastixExe"], elasDict)
         
-    def __RunNonrigidElas(self, datasetIndex, nonrigidExpIndex):
-        elasDict = self.__experimentSettings.GetNonrigidElastixSettings(datasetIndex, nonrigidExpIndex)
-        expDir = self.__envDict["NonrigidRegDirs"][nonrigidExpIndex]
-        elasDict.update({"-out":expDir})
-        elasDict.update({"-p":expDir + "/parameterFile.txt"})
-        elasDict.update({"-t0":self.__environment["RigRegDir"] + "/TransformParameters.0.txt"})
-        self.__RunElasTrans(self.__envDict["ElastixExe"], elasDict)
+        dataset = self.__settings["dataset"]
+        
+        elasDict = {"-f": dataset["fixedIm"]}
+        elasDict.update({"-m": dataset["movingIm"]})
+        elasDict.update({"-p":self.__envDict["rigidParameterFile"]})
+        elasDict.update({"-out":self.__envDict["rigidRegDir"]})
+        self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
+        
+    def __RunNonrigidElas(self, datasetIndex, nonrigidExpIndex, nonrigidParamFile):
+        dataset = self.__settings["dataset"]
+        extension = self.__settings["extension"]
+        
+        elasDict = extension["commandlineParameters"]
+        elasDict.update({"-f": dataset["fixedIm"]})
+        elasDict.update({"-m": dataset["movingIm"]})
+        
+        elasDict.update({"-out": self.__envDict["nonrigidRegDirs"][nonrigidExpIndex]})
+        elasDict.update({"-p": nonrigidParamFile})
+        elasDict.update({"-t0": self.__envDict["rigidRegDir"] + "/TransformParameters.0.txt"})
+        self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
         
         
     """
@@ -198,17 +211,20 @@ class Elastix(Base):
         @return: Returns executable response.
     """
     def __RunElasTrans(self, cmd, _dict):
+        print(cmd, _dict)
+        """
         cmd += " "
         self.__CreateDir(_dict["out"])
         for key in _dict:
             cmd += key + " " + _dict[key] + " "
         return exeGetOutput(cmd)   
+        """
         
     
     def __CreateNonRigidParamFile(self, ind):
-        dirToSave = self.__envDict["NonrigRegDirs"][ind]
+        dirToSave = self.__envDict["nonrigidRegDirs"][ind]
         outFile = dirToSave + "/nonRigParamFile.txt"
-        shutil.copy(self.__envDict["NonrigidParameterFile"], outFile)
+        shutil.copy(self.__envDict["nonrigidParameterFile"], outFile)
         return outFile
         
     def __CreateDir(self, dir_):

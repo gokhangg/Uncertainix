@@ -11,7 +11,7 @@ import abc
 class MethodB(abc.ABC):
     
     @abc.abstractmethod
-    def SetExperimentSettings(self):
+    def SetMethodSettings(self):
         pass
     
     @abc.abstractmethod

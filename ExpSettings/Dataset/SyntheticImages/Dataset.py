@@ -19,7 +19,7 @@
 # *=========================================================================
 
 import os
-from ExpSettings.Parameter import Parameter as Par
+from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
@@ -46,16 +46,16 @@ def GetParameters():
 __DATASET_SIZE = 30
 
 def GetFixedImage(ind: int):
-    return __selfPath + "/ImFlatN.mhd"
+    return __selfPath + "/Images/ImFlatN.mhd"
 
 def GetFixedImageSegmentation(ind: int):
-    return __selfPath + "/ImFlat.mhd"
+    return __selfPath + "/Images/ImFlat.mhd"
 
 def GetMovingImage(ind: int):
-    return __selfPath + "/Im" + str(ind) + "N.mhd"
+    return __selfPath + "/Images/Im" + str(ind) + "N.mhd"
 
 def GetMovingImageSegmentation(ind: int):
-    return __selfPath + "/Im" + str(ind) + ".mhd"
+    return __selfPath + "/Images/Im" + str(ind) + ".mhd"
 
 def GetRegistrationParamFiles():
     retVal = {}
@@ -71,14 +71,13 @@ def GetDataset(ind: int):
     retVal.update({"movingSeg": GetMovingImageSegmentation(ind)})
     return retVal
 
-def GetElastixParameters():
-    paramDict = {"MethodParameters": GetParameters()}
-    paramDict.update({"MethodFiles": GetRegistrationParamFiles()})
-    return paramDict
+def GetPceSettingsFile():
+    return __selfPath + "/PceSettings.json"
+
 
 class Dataset(DatasetBase):
     def __init__(self):
-        self.__methodParameters = GetElastixParameters()  
+        pass
 
     def GetDatasetSize(self):
         return __DATASET_SIZE
@@ -86,7 +85,13 @@ class Dataset(DatasetBase):
     def GetDatasetWithIndex(self, ind:int):
         return GetDataset(ind)
     
-    def GetMethodParameters(self, ind:int):
-        return self.__methodParameters
+    def GetMethodExtensionParams(self, ind:int):
+        return {"CommandlineParameters": None, "ParameterFiles": GetRegistrationParamFiles()}
+    
+    def GetModeExtensionParams(self, ind:int):
+        return {"PceSettingsFile": GetPceSettingsFile()}
+    
+    def GetParameters(self, datasetIndex):
+        return GetParameters()
 
 

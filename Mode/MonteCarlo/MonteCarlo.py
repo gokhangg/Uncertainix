@@ -24,17 +24,20 @@ from Mode.ModeB import ModeB
 
 class MonteCarlo(ModeB):
 
-    def SetStatSettings(self, settings):
-        self.__sigma = settings["Sigma"]
-        self.__mu = settings["Mean"]
-        self.__distribution = settings["Distribution"]
-        self.__sampleValues = self.__GetSampleVals()
+    
+    def SetModeSettings(self, settings):
+        parameters = settings["parameters"]
+        self.__sampleSize = settings["extension"]["sampleSize"]
+        
+        for it in parameters:
+            it.SetRawValues(self.__GetSampleVal(it, self.__sampleSize))
+        self.__parameters = parameters
     
     def SetSampleSize(self, sz):
         self.__sampleSize = sz
     
-    def GetSampleVals(self):
-        return self.__sampleValues
+    def GetParameters(self):
+        return self.__parameters
     
     def SetMethodOutput(self, MethodOutputObj):
         self.__methodOutputObj = MethodOutputObj
@@ -44,15 +47,6 @@ class MonteCarlo(ModeB):
     
     def Run(self):
         self.__result = self.__GetStdVect()
-    
-    @staticmethod
-    def __GetSampleSettings():
-        settings = {}
-        settings["SampleSize"] = 100
-        settings["Sigma"] = [1., 2., 3.]
-        settings["Mean"] = [0., 1., 2.]
-        settings["Distribution"] = ["Gauss", "Gauss", "Gauss"]
-        return settings
 
 
     """
@@ -70,16 +64,12 @@ class MonteCarlo(ModeB):
         self.__sum /= self.__sampleNum
         self.__pow2 /= self.__sampleNum
         return np.sqrt(np.abs(self.__pow2 - self.__sum ** 2))
-
-    def __GetSampleVals(self):
-        retVal = self.__GetSampleVal(0)
-        for ind in range(1, len(self.__mu)):
-            np.concatenate((retVal, self.__GetSampleVal(ind)), 1)
-        return retVal
     
-    def __GetSampleVal(self, ind):
-        if self.__distribution == "Gauss":
-            return np.random.normal(self.__mu[ind], self.__sigma[ind], [self.__sampleSize, 1])
+    @staticmethod
+    def __GetSampleVal(parameter, sampleSize):
+        stat = parameter.GetStatistics()
+        if stat["distribution"] == "Gauss" or stat["Distribution"] == "gauss":
+            return np.random.normal(float(stat["mean"]), float(stat["std"]), [sampleSize, 1])
         
         
         

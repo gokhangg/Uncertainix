@@ -18,5 +18,13 @@ class DatasetBase(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def GetMethodParameters(self, ind:int):
+    def GetMethodExtensionParams(self, ind:int):
+        pass
+    
+    @abc.abstractmethod
+    def GetModeExtensionParams(self, ind:int):
+        pass
+    
+    @abc.abstractmethod
+    def GetParameters(self, ind: int):
         pass

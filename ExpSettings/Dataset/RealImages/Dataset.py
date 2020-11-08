@@ -19,7 +19,7 @@
 # *=========================================================================
 
 import os
-from ExpSettings.Parameter import Parameter as Par
+from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
@@ -92,14 +92,19 @@ def getAllDatasets():
     return [getFullDatasetInfo(__datasets, __key) for __key in __datasets]
 
 def GetParameters():
+    mapFunct = lambda a : pow(2, a)
+    
     """Real Dataset"""
     par = []
     """Real Dataset"""
-    par1 = Par("Metric1Weight", "gauss", 3.3, 2.8)
+    par1 = Par("Metric1Weight", "Gauss", 3.3, 2.8)
+    par1.SetMapFunct(mapFunct)
     """Real Dataset"""
-    par2 = Par("Metric2Weight", "gauss", -8.0, 1.2)
+    par2 = Par("Metric2Weight", "Gauss", -8.0, 1.2)
+    par2.SetMapFunct(mapFunct)
     """Real Dataset"""
-    par3 = Par("FinalGridSpacingInPhysicalUnits", "gauss", 6.0, 0.5)
+    par3 = Par("FinalGridSpacingInPhysicalUnits", "Gauss", 6.0, 0.5)
+    par3.SetMapFunct(mapFunct)
 
     par.append(par1)
     par.append(par2)
@@ -108,16 +113,17 @@ def GetParameters():
 
 def GetRegistrationParamFiles():
     retVal = {}
-    retVal.update({"RigidParamFile": __selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"})
-    retVal.update({"NonRigidParamFile": __selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"})
+    retVal.update({"rigidParameterFile": __selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"})
+    retVal.update({"nonrigidParameterFile": __selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"})
     return retVal
 
 def GetElastixParameters():
-    paramDict = {"MethodParameters": GetParameters()}
-    paramDict.update({"MethodParameterExtension": {"ELastixParameterFiles": GetRegistrationParamFiles()} })
+    paramDict = {"methodParameters": GetParameters()}
+    paramDict.update({"methodParameterExtension": {"ELastixParameterFiles": GetRegistrationParamFiles()} })
     return paramDict
     
-    
+def GetPceSettingsFile():
+    return __selfPath + "/PceSettings.json"
 
 class Dataset(DatasetBase):
     def __init__(self):
@@ -130,13 +136,20 @@ class Dataset(DatasetBase):
     def GetDatasetWithIndex(self, ind):
         return self.__dataset[ind]
     
-    def GetMethodParameters(self, ind):
-        paramDict = self.__methodParameters
-        extensionDict = {"-dt": self.__dataset[ind]["fixedSegDt"]}
-        extensionDict.update({"-fp": self.__dataset[ind]["pointSet"]})
-        
-        paramDict.update({"MethodParameterExtension": {"CommandlineParameters": GetRegistrationParamFiles()} })
-        return paramDict
+    
+    def GetMethodExtensionParams(self, datasetIndex):
+        extensionDict = { "commandlineParameters": {"-dt": self.__dataset[datasetIndex]["fixedSegDt"], "-fp": self.__dataset[datasetIndex]["pointSet"]} }
+        extensionDict.update({"parameterFiles": GetRegistrationParamFiles()})
+        return extensionDict
+    
+    def GetModeExtensionParams(self, ind:int):
+        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 1000}
+    
+    
+    def GetParameters(self, datasetIndex):
+        return GetParameters()
+    
+
 
 
 

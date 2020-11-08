@@ -2,19 +2,17 @@
 
 from Mode import Create as CreateMode
 from Method import Create as CreateMethod
-from Method.Environment.EnvSetup import Environment as Environment
-import ItkHandler.itk_handler.itk_handler as ItkHandler
-from Dataset import Create as CreateDataset
+from ExpSettings.Dataset.ExperimentSettings import ExperimentSettings
+from ItkHandler.ItkHandler import  ItkHandler
 
 import time
 
-
-
 class Implementation():
     
-    def __init__(self):
+    def __init__(self, datasetType: str, rootDir: str):
         self.__itkHandler = ItkHandler()
-        self.__env = Environment()
+        self.__datasetType = datasetType
+        self.__rootDir = rootDir
         self.__sampleSize = 100
     
     def SelectMode(self, mode):
@@ -26,31 +24,23 @@ class Implementation():
     def SelectMethod(self, method):
         if method == "Elastix":
             self.__method = CreateMethod.CreateElastix()
-        self.__method.SetEnvironment(self.__env)
-            
-    def SelectDataset(self, dataset):
-        if dataset == "RealDataset":
-            self.__dataset = CreateDataset.RealDataset()
-        elif dataset == "SimulatedDataset":
-            self.__dataset = CreateDataset.Synthetic()
+
             
     def SetSampleSize(self, size):
         self.__sampleSize = size
             
     def Run(self, datasetIndex = 0):
-        paramSettings = self.__dataset.GetParams()
+        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType,datasetIndex)
         
-        self.__mode.SetStatSettings(paramSettings)
-        self.__mode.SetSampleSize(self.__sampleSize)
-        paramVals = self.__mode.GetSampleVals()
         
-        dataset = self.__dataset.GetDatasetWithIndex(datasetIndex)
-        self.__method.SetDataset(dataset)
-        self.__method.SetParamSettings(paramSettings)
-        self.__method.SetEnvironment(self.__env)
-        self.__method.SetParamVals(paramVals)
+        modeSettings = self.__experSettings.GetModeSettings()
+        self.__mode.SetModeSettings(modeSettings)
+        parameters = self.__mode.GetParameters()
+        self.__experSettings.SetParameters(parameters)
         
-        self.__method.Run()
+        methodSettings = self.__experSettings.GetMethodSettings()
+        self.__method.SetMethodSettings(methodSettings)
+        self.__method.Run(datasetIndex)
         while not self.__method.IsFinished():
             time.sleep(25)
         
@@ -61,3 +51,6 @@ class Implementation():
         
     def GetResult(self):
         return self.__mode.GetResult()
+    
+    
+

@@ -11,15 +11,11 @@ import abc
 class ModeB(abc.ABC):
     
     @abc.abstractmethod
-    def SetStatSettings(self):
+    def SetModeSettings(self):
         pass
     
     @abc.abstractmethod
-    def SetSampleSize(self, size):
-        pass
-    
-    @abc.abstractmethod
-    def GetSampleVals(self):
+    def GetParameters():
         pass
     
     @abc.abstractmethod
