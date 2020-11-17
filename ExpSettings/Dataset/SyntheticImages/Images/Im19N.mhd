@@ -1,0 +1,13 @@
+ObjectType = Image
+NDims = 2
+BinaryData = True
+BinaryDataByteOrderMSB = False
+CompressedData = False
+TransformMatrix = 1 0 0 1
+Offset = 60 50
+CenterOfRotation = 0 0
+ElementSpacing = 1 1
+DimSize = 512 512
+AnatomicalOrientation = ??
+ElementType = MET_UCHAR
+ElementDataFile = Im19N.raw
