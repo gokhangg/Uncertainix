@@ -1,3 +1,6 @@
 [submodule "pyPCE"]
 	path = pyPCE
 	url = https://github.com/gokhangg/pyPCE
+[submodule "Mode/PceHandler/pyPCE"]
+	path = Mode/PceHandler/pyPCE
+	url = https://github.com/gokhangg/pyPCE.git
