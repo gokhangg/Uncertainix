@@ -6,7 +6,7 @@ from ExpSettings.Dataset.SyntheticImages.Dataset   import Dataset  as SyntheticI
 from ExpSettings.Dataset.RealImages.Environment import  Environment as RealImagesEnvironment
 from ExpSettings.Dataset.SyntheticImages.Environment  import Environment  as SyntheticImagesEnvironment
 
-def GetDataset2(datasetType):
+def GetDataset(datasetType):
     if datasetType == "Real":
         return RealImages()
     if datasetType == "Synthetic":
@@ -22,7 +22,7 @@ def GetEnvironment(datasetType, rootDir):
 class ExperimentSettings(Base):
     
     def __init__(self, rootDir: str, datasetType: str, datasetIndex: int):
-        self.__dataset = GetDataset2(datasetType)
+        self.__dataset = GetDataset(datasetType)
         self.__environment = GetEnvironment(datasetType, rootDir)
         self.__parameters = self.__dataset.GetParameters(datasetIndex)
         self.__datasetIndex = datasetIndex

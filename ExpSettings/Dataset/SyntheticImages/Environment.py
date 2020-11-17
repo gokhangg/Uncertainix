@@ -48,9 +48,9 @@ class Environment(EnvBase):
         #Settings file for PCE execution model
         self["pceModelSetRunFile"] = "/PCE_Settings.json"
         #Elastix executable 
-        self["elastixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/elastix"
+        self["elastixExe"] = "/tools/elastix/bin/bin/elastix"
         #Transformix executable
-        self["transformixExe"] = "/home/gogo/Tools/elastix-5.0.0/bin/bin/transformix"
+        self["transformixExe"] = "/tools/elastix/bin/bin/transformix"
     
     def GetEnvironmentDict(self, el = {}):
         return self.__dictionary

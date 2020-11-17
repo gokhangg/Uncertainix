@@ -143,7 +143,7 @@ class Dataset(DatasetBase):
         return extensionDict
     
     def GetModeExtensionParams(self, ind:int):
-        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 1000}
+        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 10}
     
     
     def GetParameters(self, datasetIndex):

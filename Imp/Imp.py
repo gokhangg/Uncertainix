@@ -40,9 +40,9 @@ class Implementation():
         
         methodSettings = self.__experSettings.GetMethodSettings()
         self.__method.SetMethodSettings(methodSettings)
-        self.__method.Run(datasetIndex)
-        while not self.__method.IsFinished():
-            time.sleep(25)
+        #self.__method.Run(datasetIndex)
+        #while not self.__method.IsFinished():
+        #    time.sleep(25)
         
         resultFunct = self.__method.GetResultWithIndex
         self.__mode.SetMethodOutput(resultFunct)

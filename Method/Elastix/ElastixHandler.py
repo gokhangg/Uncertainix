@@ -127,7 +127,7 @@ class Elastix(Base):
             
             """The last point is to run the nonrigid registration"""
             self.__RunNonrigidElas(datasetIndex, expInd, nonrigidParamFile)
-        """All non rigid registrations perhaps are need to be finished
+        """All non rigid registrations perhaps are needed to be finished
            So waiting here if the wait functio is set.
         """   
         self.__WaitFunction()
@@ -171,7 +171,7 @@ class Elastix(Base):
         elasDict.update({"-m": dataset["movingIm"]})
         elasDict.update({"-p":self.__envDict["rigidParameterFile"]})
         elasDict.update({"-out":self.__envDict["rigidRegDir"]})
-        self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
+        return self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
         
     def __RunNonrigidElas(self, datasetIndex, nonrigidExpIndex, nonrigidParamFile):
         dataset = self.__settings["dataset"]
@@ -212,13 +212,12 @@ class Elastix(Base):
     """
     def __RunElasTrans(self, cmd, _dict):
         print(cmd, _dict)
-        """
         cmd += " "
-        self.__CreateDir(_dict["out"])
+        self.__CreateDir(_dict["-out"])
         for key in _dict:
             cmd += key + " " + _dict[key] + " "
         return exeGetOutput(cmd)   
-        """
+    
         
     
     def __CreateNonRigidParamFile(self, ind):
