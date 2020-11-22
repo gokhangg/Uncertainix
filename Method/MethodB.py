@@ -21,6 +21,10 @@ class MethodB(abc.ABC):
     @abc.abstractmethod
     def IsFinished(self):
         pass    
+
+    @abc.abstractmethod
+    def GetResultsReady(self, indices: list):
+        pass
     
     @abc.abstractmethod
     def GetResultWithIndex(self):

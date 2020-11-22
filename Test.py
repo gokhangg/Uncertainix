@@ -6,9 +6,18 @@ Created on Sun Nov  8 15:16:55 2020
 """
 
 from Imp.Imp import Implementation
+from ItkHandler.ItkHandler import  ItkHandler
+import os
+selfDir = os.path.dirname(__file__)
 
-
-imp = Implementation("Real", "D:")
+imp = Implementation("Real", selfDir)
 imp.SelectMethod("Elastix")
-imp.SelectMode("MonteCarlo")
+imp.SelectMode("PCE")
 imp.Run(0)
+
+imp.GetResult()
+
+
+
+
+

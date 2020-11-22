@@ -15,7 +15,7 @@ class ModeB(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def GetParameters():
+    def GetParameters(self):
         pass
     
     @abc.abstractmethod

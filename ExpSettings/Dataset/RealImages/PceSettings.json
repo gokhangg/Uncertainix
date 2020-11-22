@@ -7,12 +7,6 @@
     "trim" : "1",
     "remove_small_elements" : "1",
     "small_element_threshold" : "1e-13",
-    
-    "blackbox_function" : "example_problem",
-    "std_devs" : ["1.5","2.5", "3.5"],
-    
-    "optional_arguments" : {
-        "problem_number" : "1"
-    }
 
+    "std_devs" : ["1.5","2.5", "3.5"]
 }

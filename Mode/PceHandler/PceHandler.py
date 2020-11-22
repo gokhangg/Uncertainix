@@ -19,54 +19,141 @@
 # *=========================================================================
 
 import numpy as np
-import os
+import os, json
 
-from ModeB import ModeB 
+from Mode.ModeB import ModeB 
 
-from pyPCE.pyPCE.pyPCE import pyPCE as PceSettings
+from pyPCE.pyPCE.SettingsFileIO import Settings as PceSettings
+from pyPCE.pyPCE.ExampleSettingsFile import*
+from pyPCE.pyPCE.pyPCE import pyPCE as PCE
 
 
 class PceHandler(ModeB):
     
-    
-    def SetStatSettings(self):
+    def __init__(self):
         pass
-    
 
-    def SetSampleSize(self, size):
-        pass
-    
+    def SetModeSettings(self, settings):
+        self.__parameters = settings["parameters"]
+        self.__environment = settings["environment"]
+        self.__extension = settings["extension"]
+        self.__batchSize = self.__extension["batchSize"]
+        settingsFile = self.__environment["pceModelSettingsFile"]
+        
+        if not os.path.isdir(self.__environment["experimentsRootDir"]):
+            os.makedirs(self.__environment["experimentsRootDir"])
+        outSettingsFile = self.__environment["experimentsRootDir"] + "/PceSettings.json"
+        PceHandler.__UpdatePceParamFile(settingsFile, outSettingsFile, self.__parameters)
 
-    def GetSampleVals(self):
-        pass
-    
+        pceSettings = PceSettings.LoadSettings(outSettingsFile)
+        self.__pce = PCE(pceSettings)
 
-    def SetMethodOutput(self):
-        pass
+        weights = self.__pce.GetModelInputSamplingScenarios()
+        self.__sampleSize = len(weights[:, 0 ])
+        for ind, it in enumerate(self.__parameters):
+            it.SetRawValues(list(weights[:, ind] + it.GetStatistics()["mean"] ))
+        
     
+    def GetParameters(self):
+        return self.__parameters
+    
+    def SetMethodOutput(self, MethodGetResultsReadyObj, MethodOutputObj):
+        self.__methodGetResultsReadyObj = MethodGetResultsReadyObj
+        self.__methodOutputObj = MethodOutputObj
+    
+    def Run(self):
+        allVect = self.__GetAllData(self.__batchSize)
+        self.__pce.SetModelOutput(allVect)
+        self.__pce.CalculatePceCoefficients()
+        print(5)
 
     def GetResult(self):
-        pass
+        return self.__pce.GetModelOutputStd([]).reshape(self.__dataShape)
+    
+    """
+    @brief: Calculates standard deviation vector-image from several 
+            deformation fields.
+    @return: NA.
+    """
+    def __GetAllData(self, batchSize = 1):
+        if batchSize == 0:
+            batchSize = 1
+        batchNum = int(self.__sampleSize / batchSize)
+        batchRemnant = self.__sampleSize % batchSize
+
+        for ind in range(batchNum):
+            indices = [ind * batchSize + ii for ii in range(batchSize)]
+            self.__methodGetResultsReadyObj(indices)
+            for ind1 in indices:
+                vect = np.array(self.__methodOutputObj(ind1), dtype = "float32")
+                if ind1 == 0:
+                    self.__dataShape = vect.shape
+                    retVect = np.zeros([vect.size, self.__sampleSize], dtype = "float32")
+                retVect[:, ind1] = vect.reshape(-1)
+
+        indicesRemnant = [batchNum * batchSize + ii for ii in range(batchRemnant)]
+        self.__methodGetResultsReadyObj(indicesRemnant)
+        for ind1 in indicesRemnant:
+            vect = self.__methodOutputObj(ind1)
+            retVect[:, ind1] = vect.reshape(-1)
+        return retVect
     
 
-    def Run(self):
-        pass
+
+    @staticmethod
+    def __GetPolynomialTypeFromDist(distribution):
+        if distribution == "Gauss" or distribution == "gauss":
+            return "hermite"
+        if distribution == "Uniform" or distribution == "uniform":
+            return "legendre"
+        if distribution == "Exponential" or distribution == "exponential":
+            return "laguerre"
+
+    @staticmethod
+    def __GetQuadratureTypeFromDist(distribution):
+        if distribution == "Gauss" or distribution == "gauss":
+            return "gauss-hermite"
+        if distribution == "Uniform" or distribution == "uniform":
+            return "gauss-legendre"
+        if distribution == "Exponential" or distribution == "exponential":
+            return "gauss-laguerre"
+
+    @staticmethod
+    def __SubUpdate(strings, settings, pceSettings):
+        for strng in strings:
+            if strng in settings:
+                pceSettings[strng] = settings[strng]
+
+    """
+    @brief: Used to generate settings file for PCE executable as per PCE 
+            settings.
+    @return: NA.
+    """
+    @staticmethod
+    def __UpdatePceParamFile(inFileName, outFileName, parameters, settings = dict()):
+        with open(inFileName, "r") as fl:
+            pceSettings  = json.load(fl)
+
+        strings = ["pol_order", "grid_level", "grid_type", "trim", "remove_small_elements", "small_element_threshold"]
+        PceHandler.__SubUpdate(strings, settings, pceSettings)
+        
+        quadType = []
+        stdDevs = []
+        polType = []
+        for parameter in parameters:
+            stat = parameter.GetStatistics()
+            quadType += [PceHandler.__GetQuadratureTypeFromDist(stat["distribution"])]
+            polType += [PceHandler.__GetPolynomialTypeFromDist(stat["distribution"])]
+            stdDevs += [stat["std"]]
+        pceSettings["quadrature_type"] = quadType
+        pceSettings["pol_type"] = polType
+        pceSettings["std_devs"] = stdDevs
+        with open(outFileName, "w") as flOut:
+            json.dump(pceSettings, flOut, indent = 2)
     
-    def __init__(self):
-        self.__sampleNum = 10
-        self.__paramsToAnalyze = []
-        self.__polOrd = 1
-        self.__gridLevel = 1
-        self.__quadratureType = []
-        self.__gridType = "sparse"
-        self.__trim = "1"
-        self.__removeSmallElements = "1"
-        self.__smallElementThresh = "1e-13"
-        self.__selfParams = {}
-        self.__clusterWaitFunc = lambda :0
-        self.__paramValTransFunc = lambda params:params
-        self.__loadFrompreviousRun = False
-    
+
+
+
     """
     @brief: Runs PCE.
     @param: rigOnCluster Sets whether rigid registration will be executed on 
@@ -79,9 +166,11 @@ class PceHandler(ModeB):
         self.elastixOnCluster(rigOnCluster)
         self.runRig()
         self.generatePceParamFile()
+        
         pceSettings = PceSettings.LoadSettings(self["PCE_ModelSetRunFile"])
         self.pce = pyPCE(pceSettings)
         self.loadWeightFromFile(self.pce.GetModelInputSamplingScenarios())
+        
         self.__clusterWaitFunc()
         self.elastixOnCluster(nonRigOnCluster)
         self.runAllNonRigidReg()
@@ -187,46 +276,7 @@ class PceHandler(ModeB):
             fl.writelines("\n")
         fl.close()
     
-    """
-    @brief: Used to generate settings file for PCE executable as per PCE 
-            settings.
-    @return: NA.
-    """
-    def generatePceParamFile(self):
-        ln = "{\n"
-        ln += "\"pol_order\" : \"" + str(self.getPolOrder()) + "\",\n"
-        ln += "\"grid_level\" : \"" + str(self.getGridLevel()) + "\",\n"
-        
-        ln += "\"quadrature_type\" : ["
-        quadType = self.getQuadratureType()
-        for ind, it in enumerate(quadType):
-            if not ind == 0:
-                ln += ","
-            ln += "\"" + it + "\""
-        ln += "],\n"
-            
-        polType = self.getPolType()
-        ln += "\"pol_type\" : ["
-        for ind, it in enumerate(polType):
-            if not ind == 0:
-                ln += ","
-            ln += "\"" + it + "\""
-        ln += "],\n"
-        
-        ln += "\"grid_type\" : \"" + str(self.getGridType()) + "\",\n"
-        ln += "\"trim\" : \"" + str(self.getTrim()) + "\",\n"
-        ln += "\"remove_small_elements\" : \"" + str(self.getRemoveSmallElements()) + "\",\n"
-        ln += "\"small_element_threshold\" : \"" + str(self.getSmallElementThresh()) + "\",\n"
-        stdDev = self.getStdDevs()
-        ln += "\"std_devs\" : ["
-        for ind, it in enumerate(stdDev):
-            if not ind == 0:
-                ln += ","
-            ln += "\"" + str(it) + "\""
-        ln += "]\n}"
-        fl = open(self["PCE_ModelSetRunFile"], "w")
-        fl.writelines(ln)
-        fl.close()
+    
     
     """
     @brief: Used to generate weights file from PCE executable for registration sampling locations .

@@ -19,7 +19,6 @@
 # *=========================================================================
 
 from Method.MethodB import MethodB as Base
-from ItkHandler.ItkHandler import ItkHandler
 
 import re, shutil, os
 import sys
@@ -32,59 +31,14 @@ else:
     exeGetOutput = commands.getoutput
     
 
-class ElastixParamFileModifier():
-    
-    def __init__(self, file, verbose = False):
-        self.__file = file
-        self.__verbose = verbose
-               
-    """
-        @brief: Replaces a parameter in an Elastix parameter file.
-        @param: fileName Parameter file to be modified.
-        @param: param Parameter which is looked for.
-        @param: value New value for the parameter.
-    """
-    def ChangeParameterValue(self, param, value):
-        Res1 = self.__FindLines(self.__file, param + " ")
-        assert Res1[0] == 1, ("Maldefinition of the parameter")
-        self.__ReplaceLine(self.__file, Res1[1][0][0], "(" + param + " " + str(value) + ")\n")
-        if self.__verbose:
-            print("Maldefinition of the parameter")
-            
-    """
-        @brief: Finds a keyword(s) in a text file, this function is intended
-                for modification of Elastix parameter files.
-        @param: fileName Name of the file where a specfic keyword(s) is sought.
-        @param: key A specfic keyword(s) which is sought.
-        @return: found Number of lines where the sought keyword(s) is found, 
-                lines Found lines and their indexes. 
-    """
-    def __FindLines(self, fileName, key):
-        pattern = re.compile(key)
-        found = 0
-        lines = {}
-        #line by line search on the file and assigning corresponding numberline
-        for i, line in enumerate(open(fileName)):
-            for match in re.finditer(pattern, line):
-                lines[found] = [i, line]
-                found += 1
-        return [found, lines]
-    
-    """
-        @brief: Replaces a line in a text.
-        @param: fileName  Name of the text file to be modified.
-        @param: lineNum Number of the line to be replaced.
-        @param: key A string which is to replace the line.
-    """
-    def __ReplaceLine(self, fileName, lineNum, key):
-        lines = open(fileName, 'r').readlines()
-        lines[lineNum] = key
-        out = open(fileName, 'w')
-        out.writelines(lines)
-        out.close()    
+__selfPath = os.path.dirname(__file__)
+
+class FunctionArray(obj):
+
+    def __init__(self, inputSize, maxOrders = [], arraySize = []):
 
 
-class Elastix(Base):
+class TestMethod(Base):
     __WaitFunction = lambda :0
     
     def __init__(self):
