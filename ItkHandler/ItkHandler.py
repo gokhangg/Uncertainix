@@ -30,7 +30,7 @@ class ItkHandler(object):
     def GetFullImage(self):
         return self.__fullImage
 
-    def SetImageVolumage(self, vol):
+    def SetImageVolume(self, vol):
         self.__fullImage[0] = vol
 
     def SetImageOrigin(self, org):

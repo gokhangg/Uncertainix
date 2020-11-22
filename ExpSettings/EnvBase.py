@@ -10,7 +10,11 @@ class EnvBase(abc.ABC):
     
     def __init__(self, rootDirectory: str):
         pass
+
+    @abc.abstractmethod
+    def GetRootEnvironmentDict(self):
+        pass
     
     @abc.abstractmethod
-    def GetEnvironmentDict(self):
+    def GetEnvironmentDictForDataset(self, datasetIndex:int, expSize:int, el:dict):
         pass

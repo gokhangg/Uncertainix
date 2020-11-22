@@ -113,24 +113,9 @@ def GetParameters():
     par.append(par3)
     return par
 
-def GetRegistrationParamFiles():
-    retVal = {}
-    retVal.update({"rigidParameterFile": __selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"})
-    retVal.update({"nonrigidParameterFile": __selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"})
-    return retVal
-
-def GetElastixParameters():
-    paramDict = {"methodParameters": GetParameters()}
-    paramDict.update({"methodParameterExtension": {"ELastixParameterFiles": GetRegistrationParamFiles()} })
-    return paramDict
-    
-def GetPceSettingsFile():
-    return __selfPath + "/PceSettings.json"
-
 class Dataset(DatasetBase):
     def __init__(self):
-        self.__dataset = getAllDatasets()
-        self.__methodParameters = GetElastixParameters()        
+        self.__dataset = getAllDatasets()    
 
     def GetDatasetSize(self):
         return len(self.__dataset)
@@ -138,15 +123,12 @@ class Dataset(DatasetBase):
     def GetDatasetWithIndex(self, ind):
         return self.__dataset[ind]
     
-    
     def GetMethodExtensionParams(self, datasetIndex):
         extensionDict = { "commandlineParameters": {"-dt": self.__dataset[datasetIndex]["fixedSegDt"], "-fp": self.__dataset[datasetIndex]["pointSet"]} }
-        extensionDict.update({"parameterFiles": GetRegistrationParamFiles()})
         return extensionDict
     
     def GetModeExtensionParams(self, ind:int):
-        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 10, "batchSize":3}
-    
+        return {"sampleSize": 10, "batchSize":3}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()

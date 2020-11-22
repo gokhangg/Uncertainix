@@ -31,8 +31,13 @@ class Implementation():
         self.__sampleSize = size
             
     def Run(self, datasetIndex = 0):
-        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType,datasetIndex)
-        
+        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType, datasetIndex)
+
+        """
+        Since the environment class is propagated through method and mode classes, a change in it in a place
+        also propagates other locations.
+        """
+        self.__experSettings.GetMethodSettings()["environment"]["experimentsRootDir"] += "/" + self.__modeName
         
         modeSettings = self.__experSettings.GetModeSettings()
         self.__mode.SetModeSettings(modeSettings)
@@ -40,8 +45,6 @@ class Implementation():
         self.__experSettings.SetParameters(parameters)
         
         methodSettings = self.__experSettings.GetMethodSettings()
-        if methodSettings["environment"]["experimentsRootDir"] is not None:
-            methodSettings["environment"]["experimentsRootDir"] += "/" + self.__modeName
         self.__method.SetMethodSettings(methodSettings)
         self.__method.Run(datasetIndex)
         while not self.__method.IsFinished():
@@ -52,10 +55,17 @@ class Implementation():
         self.__mode.Run()
         
     def GetResult(self):
-        return self.__mode.GetResult()
+        im_ = [self.__mode.GetResult(), self.__resultImageOrigin, self.__resultImageSpacing]
+        methodSettings = self.__experSettings.GetMethodSettings()
+        if methodSettings["environment"]["finalResultFile"] is not None:
+            ItkHandler.SaveItkImage(methodSettings["environment"]["finalResultFile"], im_, isVector=True)
 
     def __GetResultforMode(self, index):
         _, itkIm = self.__method.GetResultWithIndex(index)
+        if index == 0:
+            self.__resultImageOrigin = itkIm.GetImageOrigin()
+            self.__resultImageSpacing = itkIm.GetImageSpacing()
+        itkIm
         return itkIm.GetImageVolume()
         
 

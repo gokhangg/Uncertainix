@@ -10,7 +10,7 @@ from ExpSettings.EnvBase import EnvBase
 
 import sys, time,os 
 
-__selfPath = os.path.dirname(__file__)
+_selfPath = os.path.dirname(__file__)
 
 if sys.version_info[0] == 3:
     import subprocess
@@ -40,27 +40,41 @@ def WaitCluster():
 class Environment(EnvBase):
     
     def __init__(self, rootDirectory):
-        self.__dictionary = {}
+        self.__rootDictionary = {}
         #Root Dir where the results to be saved
         self["rootDir"] = rootDirectory
         self["experimentsRootDir"] = self["rootDir"] + "/ExperimentResults/SynthImages"
+        self["rigidParameterFile"] = _selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"
+        self["nonrigidParameterFile"] = _selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"
         self["WaitFunction"] = WaitCluster
         
         
         #Settings file for PCE execution model
-        self["pceModelSetRunFile"] = __selfPath + "/PCE_Settings.json"
+        self["pceModelSetRunFile"] = _selfPath + "/PCE_Settings.json"
         #Elastix executable 
         self["elastixExe"] = "/tools/elastix/bin/bin/elastix"
         #Transformix executable
         self["transformixExe"] = "/tools/elastix/bin/bin/transformix"
+
+    def GetRootEnvironmentDict(self):
+        return self.__rootDictionary
     
-    def GetEnvironmentDict(self, el = {}):
-        return self.__dictionary
+    def GetEnvironmentDictForDataset(self, datasetIndex, expSize, el = {}):
+        envDict = self.__rootDictionary
+
+        envDict.update({"rigidRegDir" : envDict["experimentsRootDir"] + "/Dataset{0:d}/Rig".format(datasetIndex)})
+        
+        nonrigDirs = [envDict["experimentsRootDir"] + "/Dataset{0:d}/Nonrig/Elas{1:d}".format(datasetIndex, ind) for ind in range(expSize)]
+        envDict.update({"nonrigidRegDirs" : nonrigDirs})
+        transDirs = [envDict["experimentsRootDir"] + "/Dataset{0:d}/Nonrig/Trans{1:d}".format(datasetIndex, ind) for ind in range(expSize)]
+        envDict.update({"transDirs" : transDirs})
+
+        return envDict
         
     def __getitem__(self, key):
-        if key in self.__dictionary:
-            return self.__dictionary[key]
+        if key in self.__rootDictionary:
+            return self.__rootDictionary[key]
         return None
     
     def __setitem__(self, key, val):
-        self.__dictionary.update({key : val})
+        self.__rootDictionary.update({key : val})
