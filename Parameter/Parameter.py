@@ -41,7 +41,6 @@ class Parameter(object):
         self.__vals = []
         self.__MapFunct = lambda a:a
         
-        
     def GetName(self):
         return self.__name
     

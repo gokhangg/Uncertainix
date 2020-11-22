@@ -21,6 +21,7 @@
 import os
 from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
+from ExpSettings.Dataset.SyntheticImages.Environment  import Environment
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
@@ -93,5 +94,8 @@ class Dataset(DatasetBase):
     
     def GetParameters(self, datasetIndex):
         return GetParameters()
+    
+    def GetEnvironment(self, rootDir):
+        return Environment(rootDir)
 
 

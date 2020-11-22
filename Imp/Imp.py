@@ -20,6 +20,7 @@ class Implementation():
             self.__mode = CreateMode.CreateMc()
         elif mode == "PCE":
             self.__mode = CreateMode.CreatePce()
+        self.__modeName = mode
     
     def SelectMethod(self, method):
         if method == "Elastix":
@@ -30,8 +31,13 @@ class Implementation():
         self.__sampleSize = size
             
     def Run(self, datasetIndex = 0):
-        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType,datasetIndex)
-        
+        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType, datasetIndex)
+
+        """
+        Since the environment class is propagated through method and mode classes, a change in it in a place
+        also propagates other locations.
+        """
+        self.__experSettings.GetMethodSettings()["environment"]["experimentsRootDir"] += "/" + self.__modeName
         
         modeSettings = self.__experSettings.GetModeSettings()
         self.__mode.SetModeSettings(modeSettings)
@@ -44,13 +50,28 @@ class Implementation():
         while not self.__method.IsFinished():
             time.sleep(25)
         
-        resultFunct = self.__method.GetResultWithIndex
-        self.__mode.SetMethodOutput(resultFunct)
+        self.__mode.SetMethodOutput(self.__method.GetResultsReady, self.__GetResultforMode)
         
         self.__mode.Run()
         
     def GetResult(self):
-        return self.__mode.GetResult()
+        im_ = [self.__mode.GetResult(), self.__resultImageOrigin, self.__resultImageSpacing]
+        methodSettings = self.__experSettings.GetMethodSettings()
+        if methodSettings["environment"]["finalResultFile"] is not None:
+            ItkHandler.SaveItkImage(methodSettings["environment"]["finalResultFile"], im_, isVector=True)
+
+    def __GetResultforMode(self, index):
+        _, itkIm = self.__method.GetResultWithIndex(index)
+        if index == 0:
+            self.__resultImageOrigin = itkIm.GetImageOrigin()
+            self.__resultImageSpacing = itkIm.GetImageSpacing()
+        itkIm
+        return itkIm.GetImageVolume()
+        
+
+
+
+    
     
     
 
