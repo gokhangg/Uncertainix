@@ -23,34 +23,34 @@ import os
 
 from ModeB import ModeB 
 
-from pyPCE.pyPCE.pyPCE import pyPCE as PceSettings
+from pyPCE.pyPCE.SettingsFileIO import Settings as Settings
+from pyPCE.pyPCE.ExampleSettingsFile import*
+from pyPCE.pyPCE.pyPCE import pyPCE as PCE
 
 
 class PceHandler(ModeB):
     
+    def SetModeSettings(self, settings):
+        parameters = settings["parameters"]
+        self.__sampleSize = settings["extension"]["sampleSize"]
+        self.__batchSize = settings["extension"]["batchSize"]
+        
+        for it in parameters:
+            it.SetRawValues(self.__GetSampleVal(it, self.__sampleSize))
+        self.__parameters = parameters
     
-    def SetStatSettings(self):
+    def GetParameters(self):
         pass
     
-
-    def SetSampleSize(self, size):
-        pass
-    
-
-    def GetSampleVals(self):
-        pass
-    
-
     def SetMethodOutput(self):
         pass
     
-
     def GetResult(self):
         pass
     
-
     def Run(self):
         pass
+    
     
     def __init__(self):
         self.__sampleNum = 10

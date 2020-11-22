@@ -21,6 +21,8 @@
 import os
 from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
+from ExpSettings.Dataset.RealImages.Environment import  Environment as Environment
+
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
@@ -143,11 +145,14 @@ class Dataset(DatasetBase):
         return extensionDict
     
     def GetModeExtensionParams(self, ind:int):
-        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 10}
+        return {"pceSettingsFile": GetPceSettingsFile(), "sampleSize": 10, "batchSize":3}
     
     
     def GetParameters(self, datasetIndex):
         return GetParameters()
+
+    def GetEnvironment(self, rootDir):
+        return Environment(rootDir)
     
 
 

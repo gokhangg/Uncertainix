@@ -8,13 +8,13 @@ class ItkHandler(object):
         self.__fullImage = [[],[],[]]
     def LoadImage(self, imFile):
         try:
-            self.__fullImage = self.loadItkImage(imFile)
+            self.__fullImage = self.LoadItkImage(imFile)
         except:
             print("Error in loading image\n")
 
     def SaveImage(self, imFile, isVector = False):
         try:
-            self.saveItkImage(imFile, self.__fullImage, isVector)
+            self.SaveItkImage(imFile, self.__fullImage, isVector)
         except:
             print("Error in saving image\n")
 

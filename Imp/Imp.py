@@ -20,6 +20,7 @@ class Implementation():
             self.__mode = CreateMode.CreateMc()
         elif mode == "PCE":
             self.__mode = CreateMode.CreatePce()
+        self.__modeName = mode
     
     def SelectMethod(self, method):
         if method == "Elastix":
@@ -39,18 +40,28 @@ class Implementation():
         self.__experSettings.SetParameters(parameters)
         
         methodSettings = self.__experSettings.GetMethodSettings()
+        if methodSettings["environment"]["experimentsRootDir"] is not None:
+            methodSettings["environment"]["experimentsRootDir"] += "/" + self.__modeName
         self.__method.SetMethodSettings(methodSettings)
-        #self.__method.Run(datasetIndex)
-        #while not self.__method.IsFinished():
-        #    time.sleep(25)
+        self.__method.Run(datasetIndex)
+        while not self.__method.IsFinished():
+            time.sleep(25)
         
-        resultFunct = self.__method.GetResultWithIndex
-        self.__mode.SetMethodOutput(resultFunct)
+        self.__mode.SetMethodOutput(self.__method.GetResultsReady, self.__GetResultforMode)
         
         self.__mode.Run()
         
     def GetResult(self):
         return self.__mode.GetResult()
+
+    def __GetResultforMode(self, index):
+        _, itkIm = self.__method.GetResultWithIndex(index)
+        return itkIm.GetImageVolume()
+        
+
+
+
+    
     
     
 

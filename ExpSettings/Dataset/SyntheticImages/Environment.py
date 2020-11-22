@@ -4,9 +4,13 @@ Created on Sat Nov  7 17:02:31 2020
 
 @author: ghngu
 """
+
+
 from ExpSettings.EnvBase import EnvBase
 
-import sys, time
+import sys, time,os 
+
+__selfPath = os.path.dirname(__file__)
 
 if sys.version_info[0] == 3:
     import subprocess
@@ -30,7 +34,7 @@ def WaitCluster():
         if not cnt == Qstat.count("\n"):
             cnt = Qstat.count("\n")
             print("Remaining Task ", cnt - 1)
-        time.sleep(2)  
+        time.sleep(10)  
 
 
 class Environment(EnvBase):
@@ -39,14 +43,12 @@ class Environment(EnvBase):
         self.__dictionary = {}
         #Root Dir where the results to be saved
         self["rootDir"] = rootDirectory
-        self["experimentsRootDir"] = self["RootDir"] + "/temp/ExpResults/MC"
-        #Rootdir where registration results to be saved
-        self["registRootDir"] = self["resultsRootDir"]
+        self["experimentsRootDir"] = self["rootDir"] + "/ExperimentResults/SynthImages"
         self["WaitFunction"] = WaitCluster
         
         
         #Settings file for PCE execution model
-        self["pceModelSetRunFile"] = "/PCE_Settings.json"
+        self["pceModelSetRunFile"] = __selfPath + "/PCE_Settings.json"
         #Elastix executable 
         self["elastixExe"] = "/tools/elastix/bin/bin/elastix"
         #Transformix executable

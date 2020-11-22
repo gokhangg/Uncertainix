@@ -28,3 +28,7 @@ class DatasetBase(abc.ABC):
     @abc.abstractmethod
     def GetParameters(self, ind: int):
         pass
+
+    @abc.abstractmethod
+    def GetEnvironment(self, rootDir: str):
+        pass

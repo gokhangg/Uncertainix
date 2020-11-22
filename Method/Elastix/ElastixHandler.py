@@ -19,7 +19,7 @@
 # *=========================================================================
 
 from Method.MethodB import MethodB as Base
-from ItkHandler import ItkHandler
+from ItkHandler.ItkHandler import ItkHandler
 
 import re, shutil, os
 import sys
@@ -93,13 +93,13 @@ class Elastix(Base):
     def SetMethodSettings(self, settings):
         self.__settings = settings
         
-        envDict = self.__settings["extension"]["environment"].GetEnvironmentDict()
+        envDict = self.__settings["environment"].GetEnvironmentDict()
         if "WaitFunction" in envDict:
             self.__WaitFunction = envDict["WaitFunction"] 
         
     def Run(self, datasetIndex, abortRigidIfExist = False):
         self.__finished = False
-        
+        self.__datasetIndex = datasetIndex
         self.__UpdateEnvironmentDict(datasetIndex)
         
         """Run Rigid registration first to init the registrations"""
@@ -126,7 +126,7 @@ class Elastix(Base):
                 paramFile.ChangeParameterValue(param.GetName(), param.GetValues()[expInd])
             
             """The last point is to run the nonrigid registration"""
-            self.__RunNonrigidElas(datasetIndex, expInd, nonrigidParamFile)
+            self.__RunNonrigidElas(expInd, nonrigidParamFile)
         """All non rigid registrations perhaps are needed to be finished
            So waiting here if the wait functio is set.
         """   
@@ -135,12 +135,15 @@ class Elastix(Base):
         
     def IsFinished(self):
         return self.__finished
+
+    def GetResultsReady(self, indices):
+        self.__GetDeformationFieldsReady(indices)
     
     def GetResultWithIndex(self, index):
-        pass
+        return self.__GetDeformationFieldAndRemoveFile(index)
     
     def __UpdateEnvironmentDict(self, datasetIndex):
-        environment = self.__settings["extension"]["environment"]
+        environment = self.__settings["environment"]
         
         exprRoot = environment["experimentsRootDir"]
         expSize = len(self.__settings["parameters"][0].GetValues())
@@ -161,7 +164,7 @@ class Elastix(Base):
         self.__envDict = envDict
        
     
-    def __RunRigidElas(self, datasetIndex, abortIfExist = False):
+    def __RunRigidElas(self, abortIfExist = False):
         if abortIfExist and os.path.exists(self.__environment["rigOutDir"] + "/TransformParameters.0.txt"):
             return
         
@@ -173,7 +176,7 @@ class Elastix(Base):
         elasDict.update({"-out":self.__envDict["rigidRegDir"]})
         return self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
         
-    def __RunNonrigidElas(self, datasetIndex, nonrigidExpIndex, nonrigidParamFile):
+    def __RunNonrigidElas(self, nonrigidExpIndex, nonrigidParamFile):
         dataset = self.__settings["dataset"]
         extension = self.__settings["extension"]
         
@@ -190,21 +193,34 @@ class Elastix(Base):
     """
         @brief: Runs transformix to get deformation field 
     """
-    def __GetDeformationField(self, datasetIndex, nonrigidExpIndex, transDict = dict()):
-        assert self.IsFinished, "Nonrigid registration have not finished."
-        
-        transDict = self.__paramSettings.GetNonrigTransformixSettings(datasetIndex, nonrigidExpIndex)
-        
-        expDir = self.__envDict["NonrigidRegDirs"][nonrigidExpIndex]
+    def __GetDeformationFieldReady(self, nonrigidExpIndex, transDict = dict()):
+                
+        expDir = self.__envDict["nonrigidRegDirs"][nonrigidExpIndex]
         transDict["-tp"] = expDir + "/TransformParameters.0.txt"
         assert os.path.isfile(transDict["-tp"]), "there is no transform parameter file to extract def field"
         
-        transDict["-out"] = self.__envDict["TransDirs"][nonrigidExpIndex]
+        transDict["-out"] = expDir
         transDict["-def"] = "all"
-        self.__CreateDir(transDict["-out"])
         self.__RunElasTrans(self.__envDict["transformixExe"], transDict)
-        
-        return nonrigidExpIndex, ItkHandler.LoadItkImage(transDict["-out"] + "/result.mhd")
+
+    """
+    @brief: Runs transformix to get deformation fields 
+    """
+    def __GetDeformationFieldsReady(self, nonrigidExpIndices, transDict = dict()):
+        for ind in nonrigidExpIndices:
+            self.__GetDeformationFieldReady(ind, transDict)
+
+    """
+        @brief: Runs transformix to get deformation field 
+    """
+    def __GetDeformationFieldAndRemoveFile(self, nonrigidExpIndex):              
+        expDir = self.__envDict["nonrigidRegDirs"][nonrigidExpIndex]
+        assert os.path.isfile(expDir + "/TransformParameters.0.txt"), "there is no transform parameter file to extract def field"
+        itkIm = ItkHandler()
+        itkIm.LoadImage(expDir + "/deformationField.mhd")
+        os.remove(expDir + "/deformationField.mhd")
+        os.remove(expDir + "/deformationField.raw")
+        return nonrigidExpIndex, itkIm
             
     """
         @brief:  Runs elastix.
@@ -216,7 +232,7 @@ class Elastix(Base):
         self.__CreateDir(_dict["-out"])
         for key in _dict:
             cmd += key + " " + _dict[key] + " "
-        return exeGetOutput(cmd)   
+        return print(exeGetOutput(cmd))
     
         
     
