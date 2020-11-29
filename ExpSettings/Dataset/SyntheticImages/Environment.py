@@ -44,8 +44,8 @@ class Environment(EnvBase):
         #Root Dir where the results to be saved
         self["rootDir"] = rootDirectory
         self["experimentsRootDir"] = self["rootDir"] + "/ExperimentResults/SynthImages"
-        self["rigidParameterFile"] = _selfPath + "/ParameterFilesPCEstochastic/Rigidpara.txt"
-        self["nonrigidParameterFile"] = _selfPath + "/ParameterFilesPCEstochastic/Nonrigidpara.txt"
+        self["rigidParameterFile"] = _selfPath + "/RegistrationParameterFiles/RigidparaPI.txt"
+        self["nonrigidParameterFile"] = _selfPath + "/RegistrationParameterFiles/NonrigidparaPI.txt"
         self["WaitFunction"] = WaitCluster
         
         
@@ -68,7 +68,7 @@ class Environment(EnvBase):
         envDict.update({"nonrigidRegDirs" : nonrigDirs})
         transDirs = [envDict["experimentsRootDir"] + "/Dataset{0:d}/Nonrig/Trans{1:d}".format(datasetIndex, ind) for ind in range(expSize)]
         envDict.update({"transDirs" : transDirs})
-
+        envDict.update({"finalResultFile": envDict["experimentsRootDir"] + "/Dataset{0:d}/Result.mhd".format(datasetIndex)})
         return envDict
         
     def __getitem__(self, key):

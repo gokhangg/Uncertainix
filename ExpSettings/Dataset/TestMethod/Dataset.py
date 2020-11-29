@@ -21,55 +21,40 @@
 
 from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
-from ExpSettings.Dataset.SyntheticImages.Environment  import Environment
+from ExpSettings.Dataset.TestMethod.Environment  import Environment
 
 import os
+import numpy as np
+
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
+#There are 5 coefficient arrays.
+__DATASET_SIZE = 5 
+
+def GetDataset(ind):
+    assert ind < 0 or ind >= __DATASET_SIZE, "There are only {0:d} number of datasets.".format(__DATASET_SIZE)
+    coefficientLetter = ""
+    if ind = 0:
+        coefficientLetter = "a"
+    if ind = 1:
+        coefficientLetter = "b"
+    if ind = 2:
+        coefficientLetter = "c"
+    if ind = 3:
+        coefficientLetter = "d"
+    if ind = 4:
+        coefficientLetter = "e"
+    return np.load("{0:s}/Coefficients/coefficient_{1:s}".format(__selfPath, coefficientLetter))
 
 def GetParameters():
-    """Simulated Dataset"""
+    """Method Test"""
     par = []
-    """Simulated Dataset"""
-    par1 = Par("Metric1Weight", "Gauss", 4.12, 2.65)
-
-    """Simulated Dataset"""
-    par2 = Par("FinalGridSpacingInPhysicalUnits", "Gauss", 4.37, 0.55)
+    par1 = Par("x", "gauss", 4.12, 2.65)
+    par2 = Par("y", "gauss", 4.37, 0.55)
 
     par.append(par1)
     par.append(par2)
     return par
-
-"""
-@brief:  Used to generate weights file from PCE executable for registration sampling locations .
-@return:  NA.
-"""   
-
-__DATASET_SIZE = 30
-
-def GetFixedImage(ind: int):
-    return __selfPath + "/Images/ImFlatN.mhd"
-
-def GetFixedImageSegmentation(ind: int):
-    return __selfPath + "/Images/ImFlat.mhd"
-
-def GetMovingImage(ind: int):
-    return __selfPath + "/Images/Im" + str(ind) + "N.mhd"
-
-def GetMovingImageSegmentation(ind: int):
-    return __selfPath + "/Images/Im" + str(ind) + ".mhd"
-
-def GetDataset(ind: int):
-    retVal = {}
-    retVal.update({"fixedIm": GetFixedImage(ind)})
-    retVal.update({"movingIm": GetMovingImage(ind)})
-    retVal.update({"fixedSeg": GetFixedImageSegmentation(ind)})
-    retVal.update({"movingSeg": GetMovingImageSegmentation(ind)})
-    return retVal
-
-def GetPceSettingsFile():
-    return __selfPath + "/PceSettings.json"
-
 
 class Dataset(DatasetBase):
     def __init__(self):
@@ -82,10 +67,10 @@ class Dataset(DatasetBase):
         return GetDataset(ind)
     
     def GetMethodExtensionParams(self, ind:int):
-        return {"commandlineParameters": {}}
+        return dict()
     
     def GetModeExtensionParams(self, ind:int):
-        return {"sampleSize": 10, "batchSize":3}
+        return dict()
     
     def GetParameters(self, datasetIndex):
         return GetParameters()

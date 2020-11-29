@@ -5,11 +5,8 @@ Created on Sun Sep 20 21:08:55 2020
 @author: ghngu
 """
 
-from MonteCarlo.MonteCarlo import MonteCarlo as MC
-from Mode.PceHandler.PceHandler import PceHandler as Pce
+import importlib as imLib
 
-def CreateMc():
-    return MC()
-
-def CreatePce():
-    return Pce()
+def CreateMode(mode):
+    module_ = imLib.import_module("Mode.{0:s}.Mode".format(mode))
+    return module_.Mode()

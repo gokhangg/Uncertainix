@@ -18,11 +18,11 @@
 # *  the License.
 # *=========================================================================
 
-import os
 from Parameter.Parameter import Parameter as Par
 from ExpSettings.DatasetBase import DatasetBase
 from ExpSettings.Dataset.RealImages.Environment import  Environment as Environment
 
+import os
 
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 

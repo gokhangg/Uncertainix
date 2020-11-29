@@ -10,9 +10,9 @@ from ItkHandler.ItkHandler import  ItkHandler
 import os
 selfDir = os.path.dirname(__file__)
 
-imp = Implementation("Real", selfDir)
-imp.SelectMethod("Elastix")
-imp.SelectMode("PCE")
+imp = Implementation("SyntheticImages", selfDir)
+imp.SelectMethod("TestMethod")
+imp.SelectMode("MonteCarlo")
 imp.Run(0)
 
 imp.GetResult()

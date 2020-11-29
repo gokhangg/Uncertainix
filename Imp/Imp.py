@@ -5,6 +5,7 @@ from Method import Create as CreateMethod
 from ExpSettings.Dataset.ExperimentSettings import ExperimentSettings
 from ItkHandler.ItkHandler import  ItkHandler
 
+import importlib as imLib
 import time
 
 class Implementation():
@@ -16,16 +17,12 @@ class Implementation():
         self.__sampleSize = 100
     
     def SelectMode(self, mode):
-        if mode == "MonteCarlo":
-            self.__mode = CreateMode.CreateMc()
-        elif mode == "PCE":
-            self.__mode = CreateMode.CreatePce()
+        self.__mode = CreateMode.CreateMode(mode)
         self.__modeName = mode
     
     def SelectMethod(self, method):
-        if method == "Elastix":
-            self.__method = CreateMethod.CreateElastix()
-
+        self.__method = CreateMethod.CreateMethod(method)
+        self.__methodName = method
             
     def SetSampleSize(self, size):
         self.__sampleSize = size

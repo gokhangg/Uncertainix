@@ -22,7 +22,7 @@ import numpy as np
 from Mode.ModeB import ModeB 
 
 
-class MonteCarlo(ModeB):
+class Mode(ModeB):
 
     
     def SetModeSettings(self, settings):
