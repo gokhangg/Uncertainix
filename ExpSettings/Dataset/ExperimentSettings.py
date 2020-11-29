@@ -1,14 +1,15 @@
 
 from ExpSettings.ExperimentSettingsBase import ExperimentSettingsBase as Base
 
-from ExpSettings.Dataset.RealImages.Dataset import Dataset as RealImages
-from ExpSettings.Dataset.SyntheticImages.Dataset   import Dataset  as SyntheticImages
+import importlib as imLib
 
+"""
+!!! Place where string based module import is done.
+
+"""
 def GetDataset(datasetType):
-    if datasetType == "Real":
-        return RealImages()
-    if datasetType == "Synthetic":
-        return SyntheticImages()        
+    module_ =  imLib.import_module("ExpSettings.Dataset.{0:s}.Dataset".format(datasetType))
+    return module_.Dataset()
 
 class ExperimentSettings(Base):
     

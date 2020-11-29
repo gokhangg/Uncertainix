@@ -28,7 +28,7 @@ from pyPCE.pyPCE.ExampleSettingsFile import*
 from pyPCE.pyPCE.pyPCE import pyPCE as PCE
 
 
-class PceHandler(ModeB):
+class Mode(ModeB):
     
     def __init__(self):
         pass

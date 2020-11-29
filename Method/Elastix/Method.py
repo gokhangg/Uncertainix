@@ -84,7 +84,7 @@ class ElastixParamFileModifier():
         out.close()    
 
 
-class Elastix(Base):
+class Method(Base):
     __WaitFunction = lambda :0
     
     def __init__(self):
