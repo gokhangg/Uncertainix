@@ -19,15 +19,17 @@ class Environment(EnvBase):
         self.__rootDictionary = {}
         #Root Dir where the results to be saved
         self["rootDir"] = rootDirectory
+        self["experimentsRootDir"] = self["rootDir"] + "/ExperimentResults/TestMethod"
 
         #Settings file for PCE execution model
-        self["pceModelSetRunFile"] = _selfPath + "/PCE_Settings.json"
+        self["pceModelSettingsFile"] = _selfPath + "/PceSettings.json"
 
     def GetRootEnvironmentDict(self):
         return self.__rootDictionary
     
     def GetEnvironmentDictForDataset(self, datasetIndex, expSize, el = {}):
         envDict = self.__rootDictionary
+        envDict.update({"finalResultFile": envDict["experimentsRootDir"] + "/Result.mhd"})
         return envDict
         
     def __getitem__(self, key):
@@ -37,4 +39,3 @@ class Environment(EnvBase):
     
     def __setitem__(self, key, val):
         self.__rootDictionary.update({key : val})
-        

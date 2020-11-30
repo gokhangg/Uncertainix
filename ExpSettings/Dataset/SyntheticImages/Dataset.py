@@ -28,13 +28,15 @@ __selfPath = os.path.dirname(os.path.realpath(__file__))
 
 
 def GetParameters():
+    mapFunct = lambda a : pow(2, a)
     """Simulated Dataset"""
     par = []
     """Simulated Dataset"""
     par1 = Par("Metric1Weight", "Gauss", 4.12, 2.65)
-
+    par1.SetMapFunct(mapFunct)
     """Simulated Dataset"""
     par2 = Par("FinalGridSpacingInPhysicalUnits", "Gauss", 4.37, 0.55)
+    par2.SetMapFunct(mapFunct)
 
     par.append(par1)
     par.append(par2)
@@ -85,7 +87,7 @@ class Dataset(DatasetBase):
         return {"commandlineParameters": {}}
     
     def GetModeExtensionParams(self, ind:int):
-        return {"sampleSize": 10, "batchSize":3}
+        return {"sampleSize": 10, "batchSize":50, "isVector": True}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()
