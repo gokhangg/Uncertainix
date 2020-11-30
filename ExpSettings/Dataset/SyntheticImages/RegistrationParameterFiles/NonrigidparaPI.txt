@@ -55,7 +55,7 @@
 (BSplineInterpolationOrder 1)
 (FinalBSplineInterpolationOrder 3)
 (DefaultPixelValue -1)
-(WriteResultImage "true")
+(WriteResultImage "false")
 (ResultImagePixelType "short")
 (ResultImageFormat "mhd")
 

@@ -53,8 +53,8 @@ class ItkHandler(object):
     @staticmethod
     def SaveItkImage(fileName, itkImage, isVector=False) :
         sitk_img = sitk.GetImageFromArray(itkImage[0], isVector)
-        sitk_img.SetOrigin(np.array(list(reversed(itkImage[1]))))
-        sitk_img.SetSpacing(np.array(list(reversed(itkImage[2]))))
+        sitk_img.SetOrigin(np.array(list(reversed(itkImage[1])), dtype = "float"))
+        sitk_img.SetSpacing(np.array(list(reversed(itkImage[2])), dtype = "float"))
         sitk.WriteImage(sitk_img, fileName)
 
     """

@@ -17,29 +17,41 @@
 # *  License for the specific language governing permissions and limitations under
 # *  the License.
 # *=========================================================================
-
+from ItkHandler.ItkHandler import  ItkHandler
+import Method.TestMethod.TestFunctions as TestFunctions
 from Method.MethodB import MethodB as Base
 
+def GetValuesFromParamList(ls_, ind_):
+    return [ls_[ind][ind_] for ind in range(len(ls_))]
 
 class Method(Base):
     
     def __init__(self):
-        pass
+        self.__TestFunct = lambda a, b:0 * a[0]
     
     def SetMethodSettings(self, settings):
-        pass
-    
+        self.__envDict = settings["environment"].GetEnvironmentDictForDataset(0,0)
+        self.__parameters = settings["parameters"]
+        self.__coefficients = settings["extension"]["coefficients"]
+        if "testFunction" in settings["extension"]:
+            self.__TestFunct = getattr(TestFunctions, settings["extension"]["testFunction"])
+        
 
-    def Run(self):
+    def Run(self, in_):
         pass
 
     def IsFinished(self):
-        pass    
+        return True   
 
 
     def GetResultsReady(self, indices: list):
         pass
-    
 
-    def GetResultWithIndex(self):
-        pass
+    def GetResultWithIndex(self, ind_: int):
+        par_ = GetValuesFromParamList(self.__parameters, ind_)
+        imVol = self.__TestFunct(self.__coefficients, par_)
+        itkIm = ItkHandler()
+        itkIm.SetImageOrigin([0 for i_ in range(len(imVol.shape))])
+        itkIm.SetImageSpacing([1 for i_ in range(len(imVol.shape))])
+        itkIm.SetImageVolume(imVol)
+        return itkIm

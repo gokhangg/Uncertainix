@@ -159,7 +159,7 @@ class Method(Base):
         elasDict.update({"-m": self.__dataset["movingIm"]})
         elasDict.update({"-p":self.__envDict["rigidParameterFile"]})
         elasDict.update({"-out":self.__envDict["rigidRegDir"]})
-        #return self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
+        return self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
         
     def __RunNonrigidElas(self, nonrigidExpIndex, nonrigidParamFile):        
         elasDict = self.__extension["commandlineParameters"]
@@ -169,7 +169,7 @@ class Method(Base):
         elasDict.update({"-out": self.__envDict["nonrigidRegDirs"][nonrigidExpIndex]})
         elasDict.update({"-p": nonrigidParamFile})
         elasDict.update({"-t0": self.__envDict["rigidRegDir"] + "/TransformParameters.0.txt"})
-        #self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
+        self.__RunElasTrans(self.__envDict["elastixExe"], elasDict)
         
         
     """
@@ -201,7 +201,7 @@ class Method(Base):
         itkIm = ItkHandler()
         itkIm.LoadImage(self.__envDict["transDirs"][nonrigidExpIndex] + "/deformationField.mhd")
         shutil.rmtree(self.__envDict["transDirs"][nonrigidExpIndex])
-        return nonrigidExpIndex, itkIm
+        return itkIm
             
     """
         @brief:  Runs elastix.

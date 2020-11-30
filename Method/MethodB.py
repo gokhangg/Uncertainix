@@ -27,5 +27,5 @@ class MethodB(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def GetResultWithIndex(self):
+    def GetResultWithIndex(self, in_: int):
         pass

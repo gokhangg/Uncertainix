@@ -10,12 +10,15 @@ from ItkHandler.ItkHandler import  ItkHandler
 import os
 selfDir = os.path.dirname(__file__)
 
-imp = Implementation("SyntheticImages", selfDir)
-imp.SelectMethod("TestMethod")
-imp.SelectMode("MonteCarlo")
-imp.Run(0)
+"""Generating Results for Pce and MC for 10 datasets"""
+for mode_ in ["MonteCarlo", "Pce"]:
+    for ind in range(10):
+        imp = Implementation("SyntheticImages", selfDir)
+        imp.SelectMethod("Elastix")
+        imp.SelectMode(mode_)
+        imp.Run(ind)
 
-imp.GetResult()
+        imp.GetResult()
 
 
 

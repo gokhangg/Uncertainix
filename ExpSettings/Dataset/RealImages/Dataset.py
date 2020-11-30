@@ -128,7 +128,7 @@ class Dataset(DatasetBase):
         return extensionDict
     
     def GetModeExtensionParams(self, ind:int):
-        return {"sampleSize": 10, "batchSize":3}
+        return {"sampleSize": 1000, "batchSize":50, "isVector": True}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()
