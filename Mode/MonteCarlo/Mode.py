@@ -85,7 +85,7 @@ class Mode(ModeB):
     @staticmethod
     def __GetSampleVal(parameter, sampleSize):
         stat = parameter.GetStatistics()
-        if stat["distribution"] == "Gauss" or stat["Distribution"] == "gauss":
+        if stat["distribution"] == "Gauss" or stat["distribution"] == "gauss":
             return np.random.normal(float(stat["mean"]), float(stat["std"]), [sampleSize, 1])
         
         

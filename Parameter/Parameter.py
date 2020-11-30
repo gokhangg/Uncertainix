@@ -66,5 +66,8 @@ class Parameter(object):
     
     def SetMapFunct(self, Funct):
         self.__MapFunct = Funct
+
+    def __getitem__(self, ind):
+        return self.__vals[ind]
     
     

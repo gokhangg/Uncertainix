@@ -30,7 +30,7 @@ class ExperimentSettings(Base):
     
     def GetModeSettings(self):
         retVal =  {"parameters": self.__parameters}
-        retVal.update( {"dataset": self.__dataset.GetDatasetWithIndex(self.__datasetIndex)} )
+        retVal.update( {"dataset": self.__dataset.GetDatasetWithIndex(self.__datasetIndex)})
         retVal.update({"environment": self.__environment})
         retVal.update( {"extension": self.__dataset.GetModeExtensionParams(self.__datasetIndex)} )
         

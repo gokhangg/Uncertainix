@@ -29,22 +29,22 @@ import numpy as np
 __selfPath = os.path.dirname(os.path.realpath(__file__))
 
 #There are 5 coefficient arrays.
-__DATASET_SIZE = 5 
+DATASET_SIZE = 5 
 
 def GetDataset(ind):
-    assert ind < 0 or ind >= __DATASET_SIZE, "There are only {0:d} number of datasets.".format(__DATASET_SIZE)
+    assert ind >= 0 or ind < DATASET_SIZE, "There are only {0:d} number of datasets.".format(DATASET_SIZE)
     coefficientLetter = ""
-    if ind = 0:
+    if ind == 0:
         coefficientLetter = "a"
-    if ind = 1:
+    if ind == 1:
         coefficientLetter = "b"
-    if ind = 2:
+    if ind == 2:
         coefficientLetter = "c"
-    if ind = 3:
+    if ind == 3:
         coefficientLetter = "d"
-    if ind = 4:
+    if ind == 4:
         coefficientLetter = "e"
-    return np.load("{0:s}/Coefficients/coefficient_{1:s}".format(__selfPath, coefficientLetter))
+    return np.load("{0:s}/Coefficients/coefficient_{1:s}.npy".format(__selfPath, coefficientLetter))
 
 def GetParameters():
     """Method Test"""
@@ -61,16 +61,16 @@ class Dataset(DatasetBase):
         pass
 
     def GetDatasetSize(self):
-        return __DATASET_SIZE
+        return DATASET_SIZE
 
     def GetDatasetWithIndex(self, ind:int):
-        return GetDataset(ind)
+        return []
     
     def GetMethodExtensionParams(self, ind:int):
-        return dict()
+        return {"coefficients": [GetDataset(ind_) for ind_ in range(DATASET_SIZE)], "testFunction":"TestFunction1"}
     
     def GetModeExtensionParams(self, ind:int):
-        return dict()
+        return {"sampleSize": 1000, "batchSize":3, "isVector": False}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()

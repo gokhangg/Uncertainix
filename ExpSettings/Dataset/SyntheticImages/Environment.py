@@ -50,7 +50,7 @@ class Environment(EnvBase):
         
         
         #Settings file for PCE execution model
-        self["pceModelSetRunFile"] = _selfPath + "/PCE_Settings.json"
+        self["pceModelSettingsFile"] = _selfPath + "/PceSettings.json"
         #Elastix executable 
         self["elastixExe"] = "/tools/elastix/bin/bin/elastix"
         #Transformix executable
