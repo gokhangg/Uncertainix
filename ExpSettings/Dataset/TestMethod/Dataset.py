@@ -70,7 +70,7 @@ class Dataset(DatasetBase):
         return {"coefficients": [GetDataset(ind_) for ind_ in range(DATASET_SIZE)], "testFunction":"TestFunction1"}
     
     def GetModeExtensionParams(self, ind:int):
-        return {"sampleSize": 1000, "batchSize":3, "isVector": False}
+        return {"sampleSize": 20000, "batchSize":3, "isVector": False}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()

@@ -51,6 +51,7 @@ class Implementation():
         self.__method.SetMethodSettings(methodSettings)
         self.__method.Run(datasetIndex)
         while not self.__method.IsFinished():
+            print("Sleeping for {0:d} seconds.".format(25))
             time.sleep(25)
         
         self.__mode.SetMethodOutput(self.__method.GetResultsReady, self.__GetResultforMode)
@@ -64,6 +65,8 @@ class Implementation():
         isVector = modeSettings["extension"]["isVector"]
         if resFile is not None:
             ItkHandler.SaveItkImage(resFile, im_, isVector)
+            return resFile
+        return ""
 
     def __GetResultforMode(self, index):
         itkIm = self.__method.GetResultWithIndex(index)
