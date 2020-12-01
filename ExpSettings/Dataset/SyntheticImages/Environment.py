@@ -52,9 +52,9 @@ class Environment(EnvBase):
         #Settings file for PCE execution model
         self["pceModelSettingsFile"] = _selfPath + "/PceSettings.json"
         #Elastix executable 
-        self["elastixExe"] = "/tools/elastix/bin/bin/elastix"
+        self["elastixExe"] = "bigrsub -R 1.5G -q day /tools/elastix/bin/bin/elastix"
         #Transformix executable
-        self["transformixExe"] = "/tools/elastix/bin/bin/transformix"
+        self["transformixExe"] = "bigrsub -R 1.5G -q day /tools/elastix/bin/bin/transformix"
 
     def GetRootEnvironmentDict(self):
         return self.__rootDictionary

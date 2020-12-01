@@ -16,7 +16,7 @@ def TestFunction1(coeffs: list, input: list):
     x = input[0]
     y = input[1]
     a, b, c, d, e = coeffs
-    res = a * x**3 + b * x * y**4 + c * x * y + d * x + e
+    res = c *  y + d * x + e + a * x**2 + b * x * y
     return res
 
 
