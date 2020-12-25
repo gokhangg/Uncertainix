@@ -8,7 +8,7 @@ Created on Sat Nov  7 17:02:31 2020
 
 from ExpSettings.EnvBase import EnvBase
 
-import sys, time,os 
+import sys, time, os 
 
 _selfPath = os.path.dirname(__file__)
 
@@ -44,6 +44,7 @@ class Environment(EnvBase):
         #Root Dir where the results to be saved
         self["rootDir"] = rootDirectory
         self["experimentsRootDir"] = self["rootDir"] + "/ExperimentResults/SynthImages"
+        print("Here",rootDirectory)
         self["rigidParameterFile"] = _selfPath + "/RegistrationParameterFiles/RigidparaPI.txt"
         self["nonrigidParameterFile"] = _selfPath + "/RegistrationParameterFiles/NonrigidparaPI.txt"
         self["WaitFunction"] = WaitCluster
@@ -52,9 +53,9 @@ class Environment(EnvBase):
         #Settings file for PCE execution model
         self["pceModelSettingsFile"] = _selfPath + "/PceSettings.json"
         #Elastix executable 
-        self["elastixExe"] = "bigrsub -R 1.5G -q day /tools/elastix/bin/bin/elastix"
+        self["elastixExe"] = "bigrsub -R 1.5G -q day /scratch/ggunay/Tools/elastix/bin/bin/elastix"
         #Transformix executable
-        self["transformixExe"] = "bigrsub -R 1.5G -q day /tools/elastix/bin/bin/transformix"
+        self["transformixExe"] = "bigrsub -R 1.5G -q day /scratch/ggunay/Tools/elastix/bin/bin/transformix"
 
     def GetRootEnvironmentDict(self):
         return self.__rootDictionary

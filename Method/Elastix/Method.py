@@ -191,6 +191,7 @@ class Method(Base):
     def __GetDeformationFieldsReady(self, nonrigidExpIndices, transDict = dict()):
         for ind in nonrigidExpIndices:
             self.__GetDeformationFieldReady(ind, transDict)
+        self.__WaitFunction()
 
     """
         @brief: Runs transformix to get deformation field 
