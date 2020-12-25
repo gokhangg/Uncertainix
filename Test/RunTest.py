@@ -12,7 +12,7 @@ from ItkHandler.ItkHandler import  ItkHandler
 import numpy as np
 import unittest
 
-TEST_EQUALITYRATIO_DELTA = 1e-0
+TEST_EQUALITYRATIO_DELTA = 1e-1
 
 def CreateTestResult(mode_):
     imp = Implementation("TestMethod", selfPath)
@@ -32,11 +32,12 @@ class TestPCE(unittest.TestCase):
         mcResIm = ItkHandler()
         pceResIm.LoadImage(pceRes)
         mcResIm.LoadImage(mcRes)
-        diff = np.abs(pceResIm.GetImageVolume().reshape(-1) - mcResIm.GetImageVolume().reshape(-1))
+        imPce = pceResIm.GetImageVolume().reshape(-1)
+        imMc = mcResIm.GetImageVolume().reshape(-1)
+        diff = np.abs((imPce - imMc) / imMc)
         sz = diff.size
-        diff = diff.sum()
-        rat = diff / sz
-        self.assertAlmostEqual(rat, 0, delta = TEST_EQUALITYRATIO_DELTA)
+        diff = diff.sum() / sz
+        self.assertAlmostEqual(diff, 0, delta = TEST_EQUALITYRATIO_DELTA)
 
 
 if __name__ == '__main__':
