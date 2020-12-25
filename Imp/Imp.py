@@ -31,7 +31,7 @@ class Implementation():
         self.__datasetIndex = index
             
     def Run(self):
-        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType, datasetIndex)
+        self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType, self.__datasetIndex)
 
         """
         Since the environment class is propagated through method and mode classes, a change in it in a place

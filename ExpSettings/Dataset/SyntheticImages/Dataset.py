@@ -87,7 +87,7 @@ class Dataset(DatasetBase):
         return {"commandlineParameters": {}}
     
     def GetModeExtensionParams(self, ind:int):
-        return {"sampleSize": 10, "batchSize":50, "isVector": True}
+        return {"sampleSize": 100, "batchSize":50, "isVector": True}
     
     def GetParameters(self, datasetIndex):
         return GetParameters()
