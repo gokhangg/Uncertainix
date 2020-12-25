@@ -26,8 +26,11 @@ class Implementation():
             
     def SetSampleSize(self, size):
         self.__sampleSize = size
+    
+    def SetDatasetIndex(self, index):
+        self.__datasetIndex = index
             
-    def Run(self, datasetIndex = 0):
+    def Run(self):
         self.__experSettings = ExperimentSettings( self.__rootDir, self.__datasetType, datasetIndex)
 
         """
@@ -49,7 +52,7 @@ class Implementation():
         
         methodSettings = self.__experSettings.GetMethodSettings()
         self.__method.SetMethodSettings(methodSettings)
-        self.__method.Run(datasetIndex)
+        self.__method.Run(self.__datasetIndex)
         while not self.__method.IsFinished():
             print("Sleeping for {0:d} seconds.".format(25))
             time.sleep(25)
